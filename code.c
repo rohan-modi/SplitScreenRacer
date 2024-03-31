@@ -262,8 +262,8 @@ int main(void) {
 		erasePlatforms(platforms1, numberOfPlatforms);
 		erasePlatforms(platforms2, numberOfPlatforms);
 		
-		drawScore(borderEndY + 10, player1.prevScore, BLACK, digits);
-		drawScore(yMin + 10, player2.prevScore, BLACK, digits);
+		drawScore(borderEndY + 5, player1.prevScore, BLACK, digits);
+		drawScore(yMin + 5 + platformSize, player2.prevScore, BLACK, digits);
 		
 		// Update past variables
 		player1.pastX = player1.x;
@@ -296,8 +296,8 @@ int main(void) {
 		drawRectangle(player1.x, player1.y, playerSize, playerSize, player1.colour);
 		drawRectangle(player2.x, player2.y, playerSize, playerSize, player2.colour);
 		
-		drawScore(borderEndY + 10, player1.score, WHITE, digits);
-		drawScore(yMin + 10, player2.score, WHITE, digits);
+		drawScore(borderEndY + 5, player1.score, WHITE, digits);
+		drawScore(yMin + 5 + platformSize, player2.score, WHITE, digits);
 		
 		// Switch buffers
 		wait_for_vsync();
