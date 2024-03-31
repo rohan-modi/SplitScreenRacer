@@ -2,6 +2,10 @@
 #include <stdbool.h>
 #include <stdio.h>
 	
+volatile int pixel_buffer_start; // global variable
+short int Buffer1[240][512]; // 240 rows, 512 (320 + padding) columns
+short int Buffer2[240][512];
+	
 unsigned char key1 = 0;
 unsigned char key2 = 0;
 unsigned char key3 = 0;
@@ -15,12 +19,11 @@ bool downPressed = false;
 bool leftPressed = false;
 bool rightPressed = false;
 
-volatile int pixel_buffer_start; // global variable
-short int Buffer1[240][512]; // 240 rows, 512 (320 + padding) columns
-short int Buffer2[240][512];
-
-int xSize = 320;
-int ySize = 240;
+int xSize = 320-1;
+int ySize = 240-1;
+int xMin = 0;
+int yMin = 0;
+int mapEndX = 600;
 
 int gravity = 1;
 int playerSize = 5;
@@ -33,6 +36,18 @@ const short int BLUE = 0x001F;
 const short int GREEN = 0x07E0;
 
 struct platform {
+	int startX;
+	int startY;
+	int width;
+	int height;
+	short int colour;
+	int prevStartX;
+	int prevStartY;
+	int prevWidth;
+	int prevHeight;
+};
+
+struct platformTemplate {
 	int startX;
 	int startY;
 	int width;
@@ -63,45 +78,127 @@ void updateKeys();
 void setSolidScreen(short int colour);
 void drawRectangle(int xStart, int yStart, int width, int height, short int colour);
 void drawPlatforms(struct platform platforms[], int numberOfPlatforms);
-void movePlayer(struct Player* player, int gravity, struct platform platforms[], int numberOfPlatforms);
+void erasePlatforms(struct platform platforms[], int numberOfPlatforms);
+void movePlayer(struct Player* player, int gravity, struct platform platforms[], int numberOfPlatforms, struct platform platformLocations[]);
 
 int main(void) {
 	// Setup
-	volatile int * pixel_ctrl_ptr = (int *)0xFF203020;
+	volatile int* pixel_ctrl_ptr = (int*)0xFF203020;
     *(pixel_ctrl_ptr + 1) = (int) &Buffer1;
     wait_for_vsync();
     pixel_buffer_start = *pixel_ctrl_ptr;
     setSolidScreen(BLACK);
     *(pixel_ctrl_ptr + 1) = (int) &Buffer2;
     pixel_buffer_start = *(pixel_ctrl_ptr + 1);
-	setSolidScreen(BLACK);
-	(*pixel_ctrl_ptr) = 1;
-	
+		
 	// Player setup
-    struct Player player1 = {6, ySize/2+15, 6, ySize/2+15, 3, -10, 0, &wPressed, &sPressed, &aPressed, &dPressed, RED};
-    struct Player player2 = {6, 6, 6, 6, 3, -10, 0, &upPressed, &downPressed, &leftPressed, &rightPressed, WHITE};
+    struct Player player1 = {xSize/2, ySize/2+15, xSize/2, ySize/2+15, 3, -10, 0, &wPressed, &sPressed, &aPressed, &dPressed, RED};
+    struct Player player2 = {xSize/2, 6, xSize/2, 6, 3, -10, 0, &upPressed, &downPressed, &leftPressed, &rightPressed, WHITE};
 	
-	// Screen Border and divider
-	struct platform platform1 = {0, 0, xSize, platformSize, BLUE};
-	struct platform platform2 = {0, (ySize/2-platformSize), xSize, platformSize*2, BLUE};
-	struct platform platform3 = {0, ySize-platformSize, xSize, platformSize, BLUE};
-	struct platform platform4 = {0, 0, platformSize, ySize, BLUE};
-	struct platform platform5 = {xSize-platformSize, 0, platformSize, ySize, BLUE};
+	int borderStartY = ySize/2-5;
+	int borderEndY = ySize/2+5;
+	int topBottomYDifference = (ySize-platformSize) - (borderStartY);
 	
-	// Jump platforms
-	struct platform platform6 = {100, 200, 50, platformSize, GREEN};
-	struct platform platform7 = {175, 175, 75, platformSize, GREEN};
+	// Player 1 front platforms
+	struct platform platformF1_1 = {xMin, borderStartY, xSize, platformSize, BLUE, xMin, yMin, xSize, platformSize};
+	struct platform platformF1_2 = {xMin, (ySize/2-platformSize), xSize, platformSize*2, BLUE, xMin, (ySize/2-platformSize), xSize, platformSize*2};
+	struct platform platformF1_3 = {xMin, ySize-platformSize, xSize, platformSize, BLUE, xMin, ySize-platformSize, xSize, platformSize};
+	struct platform platformF1_4 = {xMin, borderEndY+1, platformSize, ySize/2-platformSize*2, BLUE, xMin, borderEndY+1, platformSize, ySize/2-platformSize*2};
+	struct platform platformF1_5 = {mapEndX, borderEndY+1, platformSize, ySize/2-platformSize*2, BLUE, mapEndX, borderEndY+1, platformSize, ySize/2-platformSize*2};
+	// Player 1 back platforms
+	struct platform platformB1_1 = {xMin, borderStartY, xSize, platformSize, BLUE, xMin, yMin, xSize, platformSize};
+	struct platform platformB1_2 = {xMin, (ySize/2-platformSize), xSize, platformSize*2, BLUE, xMin, (ySize/2-platformSize), xSize, platformSize*2};
+	struct platform platformB1_3 = {xMin, ySize-platformSize, xSize, platformSize, BLUE, xMin, ySize-platformSize, xSize, platformSize};
+	struct platform platformB1_4 = {xMin, borderEndY+1, platformSize, ySize/2-platformSize*2, BLUE, xMin, borderEndY+1, platformSize, ySize/2-platformSize*2};
+	struct platform platformB1_5 = {mapEndX, borderEndY+1, platformSize, ySize/2-platformSize*2, BLUE, mapEndX, borderEndY+1, platformSize, ySize/2-platformSize*2};
+	// Player 2 front platforms
+	struct platform platformF2_1 = {xMin, yMin, xSize, platformSize, BLUE, xMin, yMin, xSize, platformSize};
+	struct platform platformF2_2 = {xMin, (ySize/2-platformSize), xSize, platformSize*2, BLUE, xMin, (ySize/2-platformSize), xSize, platformSize*2};
+	struct platform platformF2_3 = {xMin, ySize-platformSize, xSize, platformSize, BLUE, xMin, ySize-platformSize, xSize, platformSize};
+	struct platform platformF2_4 = {xMin, yMin+platformSize, platformSize, ySize/2-platformSize*2, BLUE, xMin, yMin+platformSize, platformSize, ySize/2-platformSize*2};
+	struct platform platformF2_5 = {mapEndX, yMin+platformSize, platformSize, ySize/2-platformSize*2, BLUE, mapEndX, yMin+platformSize, platformSize, ySize/2-platformSize*2};
+	// Player 2 back platforms
+	struct platform platformB2_1 = {xMin, yMin, xSize, platformSize, BLUE, xMin, yMin, xSize, platformSize};
+	struct platform platformB2_2 = {xMin, (ySize/2-platformSize), xSize, platformSize*2, BLUE, xMin, (ySize/2-platformSize), xSize, platformSize*2};
+	struct platform platformB2_3 = {xMin, ySize-platformSize, xSize, platformSize, BLUE, xMin, ySize-platformSize, xSize, platformSize};
+	struct platform platformB2_4 = {xMin, yMin+platformSize, platformSize, ySize/2-platformSize*2, BLUE, xMin, yMin+platformSize, platformSize, ySize/2-platformSize*2};
+	struct platform platformB2_5 = {mapEndX, yMin+platformSize, platformSize, ySize/2-platformSize*2, BLUE, mapEndX, yMin+platformSize, platformSize, ySize/2-platformSize*2};
+		
+	// Jumpers
+	struct platform platformF1_6;
+	struct platform platformF1_7;
+	struct platform platformF1_8;
+	struct platform platformF1_9;
+	// Jumpers
+	struct platform platformB1_6;
+	struct platform platformB1_7;
+	struct platform platformB1_8;
+	struct platform platformB1_9;
+	// Jumpers
+	struct platform platformF2_6;
+	struct platform platformF2_7;
+	struct platform platformF2_8;
+	struct platform platformF2_9;
+	// Jumpers
+	struct platform platformB2_6;
+	struct platform platformB2_7;
+	struct platform platformB2_8;
+	struct platform platformB2_9;
+		
+	struct platformTemplate platform1 = {100, borderEndY+75, 50, platformSize, GREEN};
+	struct platformTemplate platform2 = {175, borderEndY+50, 50, platformSize, GREEN};
+	struct platformTemplate platform3 = {300, borderEndY+75, 50, platformSize, GREEN};
+	struct platformTemplate platform4 = {385, ySize-50-platformSize, platformSize, 50, GREEN};
+	struct platformTemplate platformSetup[] = {platform1, platform2, platform3, platform4};
 	
-	struct platform platform8 = {100, 200-ySize/2, 50, platformSize, GREEN};
-	struct platform platform9 = {175, 175-ySize/2, 75, platformSize, GREEN};
+	struct platform platforms1[] = {platformF1_1, platformF1_2, platformF1_3, platformF1_4, platformF1_5, platformF1_6, platformF1_7, platformF1_8, platformF1_9};
+	struct platform platformLocations1[] = {platformB1_1, platformB1_2, platformB1_3, platformB1_4, platformB1_5, platformB1_6, platformB1_7, platformB1_8, platformB1_9};
 	
-	struct platform platforms[] = {platform1, platform2, platform3, platform4, platform5, platform6, platform7, platform8, platform9};
-
-    int numberOfPlatforms = sizeof(platforms)/sizeof(platforms[0]);
+	struct platform platforms2[] = {platformF2_1, platformF2_2, platformF2_3, platformF2_4, platformF2_5, platformF2_6, platformF2_7, platformF2_8, platformF2_9};
+	struct platform platformLocations2[] = {platformB2_1, platformB2_2, platformB2_3, platformB2_4, platformB2_5, platformB2_6, platformB2_7, platformB2_8, platformB2_9};
+		
+	int numberOfPlatforms = sizeof(platforms1)/sizeof(platforms1[0]);
+	for (int i = 5; i < numberOfPlatforms; i++) {
+		platforms1[i].startX = platformSetup[i-5].startX;
+		platforms1[i].prevStartX = platformSetup[i-5].startX;
+		platforms1[i].startY = platformSetup[i-5].startY;
+		platforms1[i].prevStartY = platformSetup[i-5].startY;
+		platforms1[i].colour = platformSetup[i-5].colour;
+		platforms1[i].height = platformSetup[i-5].height;
+		platforms1[i].prevHeight = platformSetup[i-5].height;
+		platforms1[i].width = platformSetup[i-5].width;
+		platforms1[i].prevWidth = platformSetup[i-5].width;
+		platformLocations1[i].startX = platformSetup[i-5].startX;
+		platformLocations1[i].prevStartX = platformSetup[i-5].startX;
+		platformLocations1[i].startY = platformSetup[i-5].startY;
+		platformLocations1[i].prevStartY = platformSetup[i-5].startY;
+		platformLocations1[i].colour = platformSetup[i-5].colour;
+		platformLocations1[i].height = platformSetup[i-5].height;
+		platformLocations1[i].prevHeight = platformSetup[i-5].height;
+		platformLocations1[i].width = platformSetup[i-5].width;
+		platformLocations1[i].prevWidth = platformSetup[i-5].width;
+		platforms2[i].startX = platformSetup[i-5].startX;
+		platforms2[i].prevStartX = platformSetup[i-5].startX;
+		platforms2[i].startY = platformSetup[i-5].startY-topBottomYDifference;
+		platforms2[i].prevStartY = platformSetup[i-5].startY-topBottomYDifference;
+		platforms2[i].colour = platformSetup[i-5].colour;
+		platforms2[i].height = platformSetup[i-5].height;
+		platforms2[i].prevHeight = platformSetup[i-5].height;
+		platforms2[i].width = platformSetup[i-5].width;
+		platforms2[i].prevWidth = platformSetup[i-5].width;
+		platformLocations2[i].startX = platformSetup[i-5].startX;
+		platformLocations2[i].prevStartX = platformSetup[i-5].startX;
+		platformLocations2[i].startY = platformSetup[i-5].startY-topBottomYDifference;
+		platformLocations2[i].prevStartY = platformSetup[i-5].startY-topBottomYDifference;
+		platformLocations2[i].colour = platformSetup[i-5].colour;
+		platformLocations2[i].height = platformSetup[i-5].height;
+		platformLocations2[i].prevHeight = platformSetup[i-5].height;
+		platformLocations2[i].width = platformSetup[i-5].width;
+		platformLocations2[i].prevWidth = platformSetup[i-5].width;
+	}	
 	
 	// Main loop
-	int screenNumber = 0;
-    setSolidScreen(BLACK);
+    //setSolidScreen(BLACK);
 	while (1) {
 		// Get key presses
 		updateKeys();
@@ -109,6 +206,8 @@ int main(void) {
 		// Erase previous players		
 		drawRectangle(player1.pastX, player1.pastY, playerSize, playerSize, BLACK);
 		drawRectangle(player2.pastX, player2.pastY, playerSize, playerSize, BLACK);
+		erasePlatforms(platforms1, numberOfPlatforms);
+		erasePlatforms(platforms2, numberOfPlatforms);
 		
 		// Update past variables
 		player1.pastX = player1.x;
@@ -116,13 +215,25 @@ int main(void) {
 		
 		player2.pastX = player2.x;
 		player2.pastY = player2.y;
+
+        for (int i = 3; i < numberOfPlatforms; i++) {
+            platforms1[i].prevStartX = platforms1[i].startX;
+            platforms1[i].prevStartY = platforms1[i].startY;
+            platforms1[i].prevWidth = platforms1[i].width;
+            platforms1[i].prevHeight = platforms1[i].height;
+			platforms2[i].prevStartX = platforms2[i].startX;
+            platforms2[i].prevStartY = platforms2[i].startY;
+            platforms2[i].prevWidth = platforms2[i].width;
+            platforms2[i].prevHeight = platforms2[i].height;
+        }
 		
 		// Move players
-		movePlayer(&player1, gravity, platforms, numberOfPlatforms);
-		movePlayer(&player2, gravity, platforms, numberOfPlatforms);
+		movePlayer(&player1, gravity, platforms1, numberOfPlatforms, platformLocations1);
+		movePlayer(&player2, gravity, platforms2, numberOfPlatforms, platformLocations2);
 		
 		// Draw stuff
-		drawPlatforms(platforms, numberOfPlatforms);
+		drawPlatforms(platforms1, numberOfPlatforms);
+		drawPlatforms(platforms2, numberOfPlatforms);
 		drawRectangle(player1.x, player1.y, playerSize, playerSize, player1.colour);
 		drawRectangle(player2.x, player2.y, playerSize, playerSize, player2.colour);
 		
@@ -134,7 +245,7 @@ int main(void) {
 
 void plot_pixel(int x, int y, short int line_color) {
 	volatile short int *one_pixel_address;
-	one_pixel_address = pixel_buffer_start + (y << 10) + (x << 1);    
+	one_pixel_address = (short int*) (pixel_buffer_start + (y << 10) + (x << 1));
 	*one_pixel_address = line_color;
 }
 
@@ -173,7 +284,6 @@ void checkKey(bool* keyBool, unsigned char code, bool extendedChar) {
 			(*keyBool) = true;	
 		}
 	}
-	
 }
 
 void updateKeys() {
@@ -196,7 +306,7 @@ void updateKeys() {
 }
 
 void setSolidScreen(short int colour) {
-	for (int x = 0; x < xSize; x++) {
+	for (int x = xMin; x < xSize; x++) {
 		for (int y = 0; y < ySize; y++) {
 			plot_pixel(x, y, colour);	
 		}
@@ -213,11 +323,19 @@ void drawRectangle(int xStart, int yStart, int width, int height, short int colo
 
 void drawPlatforms(struct platform platforms[], int numberOfPlatforms) {
 	for (int i = 0; i < numberOfPlatforms; i++) {
-		drawRectangle(platforms[i].startX, platforms[i].startY, platforms[i].width, platforms[i].height, platforms[i].colour);
+		if (platforms[i].startX >= xMin && platforms[i].startX + platforms[i].width <= xSize) {
+			drawRectangle(platforms[i].startX, platforms[i].startY, platforms[i].width, platforms[i].height, platforms[i].colour);	
+		}
 	}			
 }
 
-void movePlayer(struct Player* player, int gravity, struct platform platforms[], int numberOfPlatforms) {
+void erasePlatforms(struct platform platforms[], int numberOfPlatforms) {
+	for (int i = 3; i < numberOfPlatforms; i++) {
+		drawRectangle(platforms[i].prevStartX, platforms[i].prevStartY, platforms[i].prevWidth, platforms[i].prevHeight, BLACK);	
+	}
+}
+
+void movePlayer(struct Player* player, int gravity, struct platform platforms[], int numberOfPlatforms, struct platform platformLocations[]) {
 	int topBoundAbove, bottomBoundAbove, topBoundBelow, bottomBoundBelow;
 	int xBoundLeft, xBoundRight;
 	if (*(player->upControl)) {
@@ -227,11 +345,11 @@ void movePlayer(struct Player* player, int gravity, struct platform platforms[],
                     player->yVelocity = player->jumpSpeed;
                 }
             }
-        }			
+        }
 	}
-	if (player->y < ySize-playerSize-platformSize) {
-		player->yVelocity += gravity;
-	}
+
+	player->yVelocity += gravity;
+	
     for (int i = 0; i < numberOfPlatforms; i++) {
 		topBoundAbove = platforms[i].startY-playerSize-abs(player->yVelocity);
 		bottomBoundAbove = platforms[i].startY+platforms[i].height;
@@ -251,16 +369,107 @@ void movePlayer(struct Player* player, int gravity, struct platform platforms[],
 		}
     }
 	player->y += player->yVelocity;
-	if ((*(player->leftControl)) && player->x > platformSize) {
-		player->x -= player->speed;
-		if (player->x < platformSize) {
-			player->x = platformSize;
+	int difference;
+	bool adjustment = false;
+	int extraDistance;
+	if ((*(player->leftControl))) {
+		bool hitLeftWall = false;
+		for (int i = 3; i < numberOfPlatforms; i++) {
+			if (player->x >= platforms[i].startX+platforms[i].width && player->x - player->speed <= platforms[i].startX+platforms[i].width) {
+				if (player->y+playerSize > platforms[i].startY && player->y < platforms[i].startY + platforms[i].height) {
+					hitLeftWall = true;
+					extraDistance = player->x - (platforms[i].startX + platforms[i].width);
+					if (extraDistance > 0) {
+						hitLeftWall = false;
+						adjustment = true;
+					}
+					break;
+				}
+			}
+		}
+		if (hitLeftWall == false) {
+			for (int i = 3; i < numberOfPlatforms; i++) {
+				if (adjustment) {
+					platformLocations[i].startX += extraDistance;	
+				} else {
+					platformLocations[i].startX += player->speed;
+				}
+				if (platformLocations[i].startX > xSize) {
+					// platforms[i].prevWidth = platforms[i].width;
+					platforms[i].width = 0;
+					// platforms[i].prevStartX = platforms[i].startX;
+					platforms[i].startX = xSize;
+				} else if (platformLocations[i].startX + platformLocations[i].width > xSize) {
+					difference = (platformLocations[i].startX + platformLocations[i].width) - xSize;
+					// platforms[i].prevWidth = platforms[i].width;
+					platforms[i].width = platformLocations[i].width - difference;
+					// platforms[i].prevStartX = platforms[i].startX;
+					platforms[i].startX = platformLocations[i].startX;
+				} else if (platformLocations[i].startX <= xMin && platformLocations[i].startX + platformLocations[i].width >= xMin) {
+					// platforms[i].prevStartX = platforms[i].startX;
+					platforms[i].startX = xMin;
+					// platforms[i].prevWidth = platforms[i].width;
+					platforms[i].width = platformLocations[i].startX + platformLocations[i].width;
+				} else {
+					// platforms[i].prevWidth = platforms[i].width;
+					platforms[i].width = platformLocations[i].width;
+					// platforms[i].prevStartX = platforms[i].startX;
+					platforms[i].startX = platformLocations[i].startX;
+				}
+			}
 		}
 	}
-	if ((*(player->rightControl)) && player->x < xSize-platformSize-playerSize) {
-		player->x += player->speed;
-		if (player->x > xSize-platformSize-playerSize) {
-			player->x = xSize-platformSize-playerSize;	
+	if ((*(player->rightControl))) {
+		bool hitRightWall = false;
+		bool adjustment = false;
+		int playerRight = player->x + playerSize;
+		int platformLeft;
+		int extraDistance;
+		int difference;
+		for (int i = 3; i < numberOfPlatforms; i++) {
+			platformLeft = platforms[i].startX;
+			if (playerRight <= platformLeft && playerRight + player->speed >= platformLeft) {
+				if (player->y+playerSize > platforms[i].startY && player->y < platforms[i].startY + platforms[i].height) {
+					extraDistance = platforms[i].startX - (player->x+playerSize);
+					hitRightWall = true;
+					if (extraDistance > 0) {
+						hitRightWall = false;
+						adjustment = true;
+					}
+					break;
+				}
+			}
+		}
+		if (hitRightWall == false) {
+			for (int i = 3; i < numberOfPlatforms; i++) {
+				if (adjustment) {
+					platformLocations[i].startX -= extraDistance;
+				} else {
+					platformLocations[i].startX -= player->speed;
+				}
+				if (platformLocations[i].startX < xMin) {
+					if (platformLocations[i].startX + platformLocations[i].width < xMin) {
+						// platforms[i].prevWidth = platforms[i].width;
+						platforms[i].width = 0;
+					} else {
+						// platforms[i].prevWidth = platforms[i].width;
+						platforms[i].width = platformLocations[i].startX + platformLocations[i].width;
+					}
+					// platforms[i].prevStartX = platforms[i].startX;
+					platforms[i].startX = xMin;
+				} else if (platformLocations[i].startX >= xMin && platformLocations[i].startX + platformLocations[i].width <= xSize) {
+					// platforms[i].prevWidth = platforms[i].width;
+					platforms[i].width = platformLocations[i].width;
+					// platforms[i].prevStartX = platforms[i].startX;
+					platforms[i].startX = platformLocations[i].startX;
+				} else {
+					difference = xSize - platformLocations[i].startX;
+					// platforms[i].prevWidth = platforms[i].width;
+					platforms[i].width = difference;
+					// platforms[i].prevStartX = platforms[i].startX;
+					platforms[i].startX = platformLocations[i].startX;
+				}
+			}
 		}
 	}
 }
