@@ -569,7 +569,153 @@ void drawScore(int y, int score, short int colour, int digits[10][15]) {
 }
 
 
+/*
+	// WALL
+	struct platform wall1 = {255, 65, platformSize, 50, WHITE};
 
+	struct platform wall2 = {255, 65 + ySize/2, platformSize, 50, WHITE};
+
+	struct platform walls[] = {wall1, wall2};
+
+    int numberOfWalls = sizeof(walls)/sizeof(walls[0]);
+
+    // DRAW STUFF
+    drawWalls(walls, numberOfWalls);
+
+
+    void drawWalls(struct platform walls[], int numberOfWalls){
+	for(int i = 0; i < numberOfWalls; i++){
+		drawRectangle(walls[i].startX, walls[i].startY, walls[i].width, walls[i].height, walls[i].colour);
+	}
+}
+
+void movePlayer(struct Player* player, int gravity, struct platform platforms[], int numberOfPlatforms, struct platform walls[], int numberOfWalls) {
+    int topBoundAbove, bottomBoundAbove, topBoundBelow, bottomBoundBelow;
+    int xBoundLeft, xBoundRight;
+    int yBoundTop, yBoundBottom; // Bounds for vertical collision detection
+    bool collisionDetected = false;
+
+    // Jump detection
+    if (*(player->upControl)) {
+        for (int i = 0; i < numberOfPlatforms; i++) {
+            if (player->y == (platforms[i].startY - playerSize)) {
+                if (player->x + playerSize > platforms[i].startX && player->x < (platforms[i].startX + platforms[i].width)) {
+                    player->yVelocity = player->jumpSpeed;
+                    // play_jump_sound((volatile int*)AUDIO_BASE); Optional sound effect
+                }
+            }
+        }           
+    }
+
+    // Apply gravity
+    if (player->y < ySize - playerSize - platformSize) {
+        player->yVelocity += gravity;
+    }
+
+    // Platform collision detection
+    for (int i = 0; i < numberOfPlatforms; i++) {
+        topBoundAbove = platforms[i].startY - playerSize - abs(player->yVelocity);
+        bottomBoundAbove = platforms[i].startY + platforms[i].height;
+        topBoundBelow = platforms[i].startY + platforms[i].height;
+        bottomBoundBelow = platforms[i].startY + platforms[i].height + abs(player->yVelocity);
+        xBoundLeft = platforms[i].startX;
+        xBoundRight = platforms[i].startX + platforms[i].width;
+
+        if (player->x + playerSize > xBoundLeft && player->x < xBoundRight) {
+            if (player->y >= topBoundAbove && player->y <= bottomBoundAbove && player->yVelocity > 0) {
+                player->y = platforms[i].startY - playerSize;
+                player->yVelocity = 0;
+            } else if (player->y >= topBoundBelow && player->y <= bottomBoundBelow && player->yVelocity < 0) {
+                player->y = platforms[i].startY + platforms[i].height + 1;
+                player->yVelocity = 0;
+            }
+        }
+    }
+
+    // Wall collision detection and resolution
+    for (int i = 0; i < numberOfWalls; i++) {
+        xBoundLeft = walls[i].startX;
+        xBoundRight = walls[i].startX + walls[i].width;
+        yBoundTop = walls[i].startY;
+        yBoundBottom = walls[i].startY + walls[i].height;
+
+        // Predictive collision detection based on player's next position
+        int playerNextX = player->x + ((*(player->rightControl)) - (*(player->leftControl))) * player->speed;
+
+        if (player->y + playerSize > yBoundTop && player->y < yBoundBottom) {
+            if ((*(player->rightControl)) && playerNextX + playerSize > xBoundLeft && player->x < xBoundRight) {
+                player->x = xBoundLeft - playerSize; // Prevent entering the wall
+                collisionDetected = true;
+            }
+            else if ((*(player->leftControl)) && playerNextX < xBoundRight && playerNextX + playerSize > xBoundLeft) {
+                player->x = xBoundRight; // Prevent entering the wall
+                collisionDetected = true;
+            }
+        }
+    }
+
+    // Apply horizontal movement if no collision detected
+    if (!collisionDetected) {
+        if ((*(player->leftControl)) && player->x > 0) {
+            player->x -= player->speed;
+        }
+        if ((*(player->rightControl)) && player->x < xSize - playerSize) {
+            player->x += player->speed;
+        }
+    }
+
+    // Apply vertical movement and prevent the player from moving out of bounds
+    player->y += player->yVelocity;
+    if (player->y < 0) {
+        player->y = 0;
+        player->yVelocity = 0;
+    } else if (player->y > ySize - playerSize) {
+        player->y = ySize - playerSize;
+        player->yVelocity = 0;
+    }
+}
+
+
+*/
+
+
+
+/*
+
+#define AUDIO_BASE 0xFF203040
+
+extern const unsigned int mario_sound_data[];
+extern const unsigned int mario_sound_data_length;
+
+
+void play_jump_sound(volatile int* audio_ptr) {
+    for (unsigned int i = 0; i < mario_sound_data_length; i++) {
+        // Use the write_audio_sample function to handle the waiting and writing
+        write_audio_sample(audio_ptr, mario_sound_data[i]);
+    }
+}
+
+void write_audio_sample(volatile int* audio_ptr, int sample) {
+    int fifo_space;
+    // Loop until there is enough space in the FIFO for a new sample
+    do {
+        fifo_space = read_fifo_space(audio_ptr);
+        // Extract available write space for left/right channels and check if at least one slot is open
+    } while (((fifo_space & 0x00FF0000) >> 16) == 0);
+
+    // If we exit the loop, we have space to write
+    *(audio_ptr + 2) = sample; // Write to left channel
+    *(audio_ptr + 3) = sample; // Write to right channel (duplicate for mono sound)
+}
+
+int read_fifo_space(volatile int* audio_ptr) {
+    return *(audio_ptr + 1); // Read the fifospace register
+}
+
+
+
+
+*/
 
 
 
