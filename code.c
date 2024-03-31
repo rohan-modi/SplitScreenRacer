@@ -23,7 +23,7 @@ int xSize = 320-1;
 int ySize = 240-1;
 int xMin = 0;
 int yMin = 0;
-int mapEndX = 600;
+int mapEndX = 850;
 
 int gravity = 1;
 int playerSize = 5;
@@ -129,33 +129,58 @@ int main(void) {
 	struct platform platformF1_7;
 	struct platform platformF1_8;
 	struct platform platformF1_9;
+	struct platform platformF1_10;
+	struct platform platformF1_11;
+	struct platform platformF1_12;
+	struct platform platformF1_13;
+	struct platform platformF1_14;
 	// Jumpers
 	struct platform platformB1_6;
 	struct platform platformB1_7;
 	struct platform platformB1_8;
 	struct platform platformB1_9;
+	struct platform platformB1_10;
+	struct platform platformB1_11;
+	struct platform platformB1_12;
+	struct platform platformB1_13;
+	struct platform platformB1_14;
 	// Jumpers
 	struct platform platformF2_6;
 	struct platform platformF2_7;
 	struct platform platformF2_8;
 	struct platform platformF2_9;
+	struct platform platformF2_10;
+	struct platform platformF2_11;
+	struct platform platformF2_12;
+	struct platform platformF2_13;
+	struct platform platformF2_14;
 	// Jumpers
 	struct platform platformB2_6;
 	struct platform platformB2_7;
 	struct platform platformB2_8;
 	struct platform platformB2_9;
+	struct platform platformB2_10;
+	struct platform platformB2_11;
+	struct platform platformB2_12;
+	struct platform platformB2_13;
+	struct platform platformB2_14;
 		
 	struct platformTemplate platform1 = {100, borderEndY+75, 50, platformSize, GREEN};
 	struct platformTemplate platform2 = {175, borderEndY+50, 50, platformSize, GREEN};
 	struct platformTemplate platform3 = {300, borderEndY+75, 50, platformSize, GREEN};
 	struct platformTemplate platform4 = {385, ySize-50-platformSize, platformSize, 50, GREEN};
-	struct platformTemplate platformSetup[] = {platform1, platform2, platform3, platform4};
+	struct platformTemplate platform5 = {425, borderEndY+75, 75, platformSize, GREEN};
+	struct platformTemplate platform6 = {525, borderEndY+50, 75, platformSize, GREEN};
+	struct platformTemplate platform7 = {625, borderEndY+25, 75, platformSize, GREEN};
+	struct platformTemplate platform8 = {725, borderEndY+50, 75, platformSize, GREEN};
+	struct platformTemplate platform9 = {800, borderEndY+50, platformSize, ySize-borderEndY-platformSize-50, GREEN};
+	struct platformTemplate platformSetup[] = {platform1, platform2, platform3, platform4, platform5, platform6, platform7, platform8, platform9};
 	
-	struct platform platforms1[] = {platformF1_1, platformF1_2, platformF1_3, platformF1_4, platformF1_5, platformF1_6, platformF1_7, platformF1_8, platformF1_9};
-	struct platform platformLocations1[] = {platformB1_1, platformB1_2, platformB1_3, platformB1_4, platformB1_5, platformB1_6, platformB1_7, platformB1_8, platformB1_9};
+	struct platform platforms1[] = {platformF1_1, platformF1_2, platformF1_3, platformF1_4, platformF1_5, platformF1_6, platformF1_7, platformF1_8, platformF1_9, platformF1_10, platformF1_11, platformF1_12, platformF1_13, platformF1_14};
+	struct platform platformLocations1[] = {platformB1_1, platformB1_2, platformB1_3, platformB1_4, platformB1_5, platformB1_6, platformB1_7, platformB1_8, platformB1_9, platformB1_10, platformB1_11, platformB1_12, platformB1_13, platformB1_14};
 	
-	struct platform platforms2[] = {platformF2_1, platformF2_2, platformF2_3, platformF2_4, platformF2_5, platformF2_6, platformF2_7, platformF2_8, platformF2_9};
-	struct platform platformLocations2[] = {platformB2_1, platformB2_2, platformB2_3, platformB2_4, platformB2_5, platformB2_6, platformB2_7, platformB2_8, platformB2_9};
+	struct platform platforms2[] = {platformF2_1, platformF2_2, platformF2_3, platformF2_4, platformF2_5, platformF2_6, platformF2_7, platformF2_8, platformF2_9, platformF2_10, platformF2_11, platformF2_12, platformF2_13, platformF2_14};
+	struct platform platformLocations2[] = {platformB2_1, platformB2_2, platformB2_3, platformB2_4, platformB2_5, platformB2_6, platformB2_7, platformB2_8, platformB2_9, platformB2_10, platformB2_11, platformB2_12, platformB2_13, platformB2_14};
 		
 	int numberOfPlatforms = sizeof(platforms1)/sizeof(platforms1[0]);
 	for (int i = 5; i < numberOfPlatforms; i++) {
