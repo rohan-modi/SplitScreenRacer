@@ -68,7 +68,20 @@ struct Player {
     bool* leftControl;
     bool* rightControl;
 	short int colour;
+	int score;
+	int prevScore;
 };
+
+const int zero[]={0x01,0x01,0x01,0x01,0x00,0x01,0x01,0x00,0x01,0x01,0x00,0x01,0x01,0x01,0x01};
+const int one[]={0x00,0x01,0x00,0x01,0x01,0x00,0x00,0x01,0x00,0x00,0x01,0x00,0x01,0x01,0x01};
+const int two[]={0x01,0x01,0x01,0x00,0x00,0x01,0x01,0x01,0x01,0x01,0x00,0x00,0x01,0x01,0x01};
+const int three[]={0x01,0x01,0x01,0x00,0x00,0x01,0x01,0x01,0x01,0x00,0x00,0x01,0x01,0x01,0x01};
+const int four[]={0x01,0x00,0x01,0x01,0x00,0x01,0x01,0x01,0x01,0x00,0x00,0x01,0x00,0x00,0x01};
+const int five[]={0x01,0x01,0x01,0x01,0x00,0x00,0x01,0x01,0x01,0x00,0x00,0x01,0x01,0x01,0x01};
+const int six[]={0x01,0x01,0x01,0x01,0x00,0x00,0x01,0x01,0x01,0x01,0x00,0x01,0x01,0x01,0x01};
+const int seven[]={0x01,0x01,0x01,0x00,0x00,0x01,0x00,0x00,0x01,0x00,0x00,0x01,0x00,0x00,0x01};
+const int eight[]={0x01,0x01,0x01,0x01,0x00,0x01,0x01,0x01,0x01,0x01,0x00,0x01,0x01,0x01,0x01};
+const int nine[]={0x01,0x01,0x01,0x01,0x00,0x01,0x01,0x01,0x01,0x00,0x00,0x01,0x01,0x01,0x01};
 
 void plot_pixel(int x, int y, short int line_color);
 void wait_for_vsync();
@@ -80,6 +93,8 @@ void drawRectangle(int xStart, int yStart, int width, int height, short int colo
 void drawPlatforms(struct platform platforms[], int numberOfPlatforms);
 void erasePlatforms(struct platform platforms[], int numberOfPlatforms);
 void movePlayer(struct Player* player, int gravity, struct platform platforms[], int numberOfPlatforms, struct platform platformLocations[]);
+void drawDigit(int number[], int startX, int startY, short int colour);
+void drawScore(int y, int score, short int colour, int digits[10][15]);
 
 int main(void) {
 	// Setup
@@ -92,12 +107,26 @@ int main(void) {
     pixel_buffer_start = *(pixel_ctrl_ptr + 1);
 		
 	// Player setup
-    struct Player player1 = {xSize/2, ySize/2+15, xSize/2, ySize/2+15, 3, -10, 0, &wPressed, &sPressed, &aPressed, &dPressed, RED};
-    struct Player player2 = {xSize/2, 6, xSize/2, 6, 3, -10, 0, &upPressed, &downPressed, &leftPressed, &rightPressed, WHITE};
+    struct Player player1 = {xSize/2, ySize/2+15, xSize/2, ySize/2+15, 3, -10, 0, &wPressed, &sPressed, &aPressed, &dPressed, RED, 0, 0};
+    struct Player player2 = {xSize/2, 6, xSize/2, 6, 3, -10, 0, &upPressed, &downPressed, &leftPressed, &rightPressed, WHITE, 0, 0};
 	
 	int borderStartY = ySize/2-5;
 	int borderEndY = ySize/2+5;
 	int topBottomYDifference = (ySize-platformSize) - (borderStartY);
+
+	int digits[10][15];
+	for (int i = 0; i < 15; i++) {
+		digits[0][i] = zero[i];
+		digits[1][i] = one[i];
+		digits[2][i] = two[i];
+		digits[3][i] = three[i];
+		digits[4][i] = four[i];
+		digits[5][i] = five[i];
+		digits[6][i] = six[i];
+		digits[7][i] = seven[i];
+		digits[8][i] = eight[i];
+		digits[9][i] = nine[i];
+	}
 	
 	// Player 1 front platforms
 	struct platform platformF1_1 = {xMin, borderStartY, xSize, platformSize, BLUE, xMin, yMin, xSize, platformSize};
@@ -223,7 +252,6 @@ int main(void) {
 	}	
 	
 	// Main loop
-    //setSolidScreen(BLACK);
 	while (1) {
 		// Get key presses
 		updateKeys();
@@ -234,12 +262,18 @@ int main(void) {
 		erasePlatforms(platforms1, numberOfPlatforms);
 		erasePlatforms(platforms2, numberOfPlatforms);
 		
+		drawScore(borderEndY + 10, player1.prevScore, BLACK, digits);
+		drawScore(yMin + 10, player2.prevScore, BLACK, digits);
+		
 		// Update past variables
 		player1.pastX = player1.x;
 		player1.pastY = player1.y;
 		
 		player2.pastX = player2.x;
 		player2.pastY = player2.y;
+		
+		player1.prevScore = player1.score;
+		player2.prevScore = player2.score;
 
         for (int i = 3; i < numberOfPlatforms; i++) {
             platforms1[i].prevStartX = platforms1[i].startX;
@@ -261,6 +295,9 @@ int main(void) {
 		drawPlatforms(platforms2, numberOfPlatforms);
 		drawRectangle(player1.x, player1.y, playerSize, playerSize, player1.colour);
 		drawRectangle(player2.x, player2.y, playerSize, playerSize, player2.colour);
+		
+		drawScore(borderEndY + 10, player1.score, WHITE, digits);
+		drawScore(yMin + 10, player2.score, WHITE, digits);
 		
 		// Switch buffers
 		wait_for_vsync();
@@ -457,6 +494,9 @@ void movePlayer(struct Player* player, int gravity, struct platform platforms[],
 				if (player->y+playerSize > platforms[i].startY && player->y < platforms[i].startY + platforms[i].height) {
 					extraDistance = platforms[i].startX - (player->x+playerSize);
 					hitRightWall = true;
+					if (i == 4) {
+						player->score++;	
+					}
 					if (extraDistance > 0) {
 						hitRightWall = false;
 						adjustment = true;
@@ -498,3 +538,40 @@ void movePlayer(struct Player* player, int gravity, struct platform platforms[],
 		}
 	}
 }
+
+void drawDigit(int number[], int startX, int startY, short int colour) {
+	int index = 0;
+	for (int y = startY; y < startY+5; y++) {
+		for (int x = startX; x < startX+3; x++) {
+			if (number[index]) {
+				plot_pixel(x, y, colour);
+			}
+			index++;
+		}
+	}
+}
+
+void drawScore(int y, int score, short int colour, int digits[10][15]) {
+	int x = xSize - 4;
+	int digit;
+	if (score == 0) {
+		drawDigit(zero, x, y, colour);
+		return;
+	}
+	while (score) {
+		digit = score % 10;
+		drawDigit(digits[digit], x, y, colour);
+		score /= 10;
+		x -= 4;
+	}
+}
+
+
+
+
+
+
+
+
+
+
