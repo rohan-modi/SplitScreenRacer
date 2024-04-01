@@ -2,7 +2,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-	
+#include <ctype.h>
+    	
 volatile int pixel_buffer_start; // global variable
 short int Buffer1[240][512]; // 240 rows, 512 (320 + padding) columns
 short int Buffer2[240][512];
@@ -137,7 +138,7 @@ void drawScore(int y, int score, short int colour, int digits[10][15]);
 void drawImage(int array[], int startX, int startY, int width, int height, short int colour);
 void drawLetter(int text[], int startX, int startY, short int colour, int size);
 void drawString(int startX, int startY, short int colour, int size, char* text, int letters[26][35]);
-void drawDigit(int number[], int startX, int startY, short int colour, int size);
+void drawDigit(const int number[], int startX, int startY, short int colour, int size);
 bool buttonPressed();
 
 int main(void) {
@@ -499,8 +500,7 @@ int main(void) {
 		wait_for_vsync();
 		int data;
 		while (1) {
-			volatile int* PS2_ptr = (int*) 0xFF200100;
-			data = *PS2_ptr;
+			updateKeys();
 			if (buttonPressed()) {
 				gameOver = false;
 				break;
@@ -733,7 +733,7 @@ void movePlayer(struct Player* player, int gravity, struct platform platforms[],
 	}
 }
 
-void drawDigit(int number[], int startX, int startY, short int colour, int size) {
+void drawDigit(const int number[], int startX, int startY, short int colour, int size) {
 	int index = 0;
 	for (int y = startY; y < startY+5*size; y += size) {
 		for (int x = startX; x < startX+3*size; x += size) {
@@ -975,10 +975,3 @@ int read_fifo_space(volatile int* audio_ptr) {
 
 
 */
-
-
-
-
-
-
-
