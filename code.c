@@ -592,6 +592,9 @@ void drawPlatforms(struct platform platforms[], int numberOfPlatforms) {
 	for (int i = 0; i < numberOfPlatforms; i++) {
 		if (platforms[i].startX >= xMin && platforms[i].startX + platforms[i].width <= xSize) {
 			drawRectangle(platforms[i].startX, platforms[i].startY, platforms[i].width, platforms[i].height, platforms[i].colour);	
+		} else if (platforms[i].startX >= xMin) {
+			int newWidth = xSize - platforms[i].startX;
+			drawRectangle(platforms[i].startX, platforms[i].startY, newWidth, platforms[i].height, platforms[i].colour);
 		}
 	}			
 }
@@ -803,6 +806,12 @@ bool buttonPressed() {
 		return true;
 	}
 }
+
+
+
+
+
+
 
 
 
