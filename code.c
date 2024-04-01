@@ -75,6 +75,15 @@ struct Player {
 	int prevScore;
 };
 
+struct PIT_t {
+	volatile unsigned int data;
+	volatile unsigned int direction;
+	volatile unsigned int mask;
+	volatile unsigned int edge;
+};
+
+struct PIT_t* const buttons = ((struct PIT_t *) 0xFF200050);
+
 // https://dot2pic.com/
 const int zero[]={0x01,0x01,0x01,0x01,0x00,0x01,0x01,0x00,0x01,0x01,0x00,0x01,0x01,0x01,0x01};
 const int one[]={0x00,0x01,0x00,0x01,0x01,0x00,0x00,0x01,0x00,0x00,0x01,0x00,0x01,0x01,0x01};
@@ -129,6 +138,7 @@ void drawImage(int array[], int startX, int startY, int width, int height, short
 void drawLetter(int text[], int startX, int startY, short int colour, int size);
 void drawString(int startX, int startY, short int colour, int size, char* text, int letters[26][35]);
 void drawDigit(int number[], int startX, int startY, short int colour, int size);
+bool buttonPressed();
 
 int main(void) {
 	// Setup
@@ -139,10 +149,6 @@ int main(void) {
     setSolidScreen(BLACK);
     *(pixel_ctrl_ptr + 1) = (int) &Buffer2;
     pixel_buffer_start = *(pixel_ctrl_ptr + 1);
-		
-	// Player setup
-    struct Player player1 = {xSize/2, ySize/2+15, xSize/2, ySize/2+15, 3, -10, 0, &wPressed, &sPressed, &aPressed, &dPressed, RED, 0, 0};
-    struct Player player2 = {xSize/2, 6, xSize/2, 6, 3, -10, 0, &upPressed, &downPressed, &leftPressed, &rightPressed, WHITE, 0, 0};
 	
 	int borderStartY = ySize/2-5;
 	int borderEndY = ySize/2+5;
@@ -259,6 +265,12 @@ int main(void) {
 	struct platform platformB2_13;
 	struct platform platformB2_14;
 		
+	struct platformTemplate borderPlatform1 = {xMin, borderEndY+1, platformSize, ySize/2-platformSize*2, BLUE};
+	struct platformTemplate borderPlatform2 = {mapEndX, borderEndY+1, platformSize, ySize/2-platformSize*2, BLUE};
+	struct platformTemplate borderPlatform3 = {xMin, yMin+platformSize, platformSize, ySize/2-platformSize*2, BLUE};
+	struct platformTemplate borderPlatform4 = {mapEndX, yMin+platformSize, platformSize, ySize/2-platformSize*2, BLUE};
+	struct platformTemplate borderPlatformSetup[] = {borderPlatform1, borderPlatform2, borderPlatform3, borderPlatform4};
+
 	struct platformTemplate platform1 = {100, borderEndY+75, 50, platformSize, GREEN};
 	struct platformTemplate platform2 = {175, borderEndY+50, 50, platformSize, GREEN};
 	struct platformTemplate platform3 = {300, borderEndY+75, 50, platformSize, GREEN};
@@ -276,123 +288,225 @@ int main(void) {
 	struct platform platforms2[] = {platformF2_1, platformF2_2, platformF2_3, platformF2_4, platformF2_5, platformF2_6, platformF2_7, platformF2_8, platformF2_9, platformF2_10, platformF2_11, platformF2_12, platformF2_13, platformF2_14};
 	struct platform platformLocations2[] = {platformB2_1, platformB2_2, platformB2_3, platformB2_4, platformB2_5, platformB2_6, platformB2_7, platformB2_8, platformB2_9, platformB2_10, platformB2_11, platformB2_12, platformB2_13, platformB2_14};
 		
-	int numberOfPlatforms = sizeof(platforms1)/sizeof(platforms1[0]);
-	for (int i = 5; i < numberOfPlatforms; i++) {
-		platforms1[i].startX = platformSetup[i-5].startX;
-		platforms1[i].prevStartX = platformSetup[i-5].startX;
-		platforms1[i].startY = platformSetup[i-5].startY;
-		platforms1[i].prevStartY = platformSetup[i-5].startY;
-		platforms1[i].colour = platformSetup[i-5].colour;
-		platforms1[i].height = platformSetup[i-5].height;
-		platforms1[i].prevHeight = platformSetup[i-5].height;
-		platforms1[i].width = platformSetup[i-5].width;
-		platforms1[i].prevWidth = platformSetup[i-5].width;
-		platformLocations1[i].startX = platformSetup[i-5].startX;
-		platformLocations1[i].prevStartX = platformSetup[i-5].startX;
-		platformLocations1[i].startY = platformSetup[i-5].startY;
-		platformLocations1[i].prevStartY = platformSetup[i-5].startY;
-		platformLocations1[i].colour = platformSetup[i-5].colour;
-		platformLocations1[i].height = platformSetup[i-5].height;
-		platformLocations1[i].prevHeight = platformSetup[i-5].height;
-		platformLocations1[i].width = platformSetup[i-5].width;
-		platformLocations1[i].prevWidth = platformSetup[i-5].width;
-		platforms2[i].startX = platformSetup[i-5].startX;
-		platforms2[i].prevStartX = platformSetup[i-5].startX;
-		platforms2[i].startY = platformSetup[i-5].startY-topBottomYDifference;
-		platforms2[i].prevStartY = platformSetup[i-5].startY-topBottomYDifference;
-		platforms2[i].colour = platformSetup[i-5].colour;
-		platforms2[i].height = platformSetup[i-5].height;
-		platforms2[i].prevHeight = platformSetup[i-5].height;
-		platforms2[i].width = platformSetup[i-5].width;
-		platforms2[i].prevWidth = platformSetup[i-5].width;
-		platformLocations2[i].startX = platformSetup[i-5].startX;
-		platformLocations2[i].prevStartX = platformSetup[i-5].startX;
-		platformLocations2[i].startY = platformSetup[i-5].startY-topBottomYDifference;
-		platformLocations2[i].prevStartY = platformSetup[i-5].startY-topBottomYDifference;
-		platformLocations2[i].colour = platformSetup[i-5].colour;
-		platformLocations2[i].height = platformSetup[i-5].height;
-		platformLocations2[i].prevHeight = platformSetup[i-5].height;
-		platformLocations2[i].width = platformSetup[i-5].width;
-		platformLocations2[i].prevWidth = platformSetup[i-5].width;
-	}	
 	
-	// Main loop
+	int numberOfPlatforms = sizeof(platforms1)/sizeof(platforms1[0]);
+	
+	int player1StartX = xSize/2;
+	int player1StartY = borderEndY + 1;
+	int player2StartX = xSize/2;
+	int player2StartY = platformSize + 1;
+	
+	int playerSpeed = 3;
+	int playerJumpSpeed = -10;
+	
+	// Player setup
+    struct Player player1 = {xSize/2, ySize/2+15, xSize/2, ySize/2+15, 3, -10, 0, &wPressed, &sPressed, &aPressed, &dPressed, RED, 0, 0};
+    struct Player player2 = {xSize/2, 6, xSize/2, 6, 3, -10, 0, &upPressed, &downPressed, &leftPressed, &rightPressed, WHITE, 0, 0};
+	
 	while (1) {
-		// Get key presses
-		updateKeys();
+		gameOver = false;
+		player1Won = false;
 		
-		// Erase previous players		
-		drawRectangle(player1.pastX, player1.pastY, playerSize, playerSize, BLACK);
-		drawRectangle(player2.pastX, player2.pastY, playerSize, playerSize, BLACK);
-		erasePlatforms(platforms1, numberOfPlatforms);
-		erasePlatforms(platforms2, numberOfPlatforms);
+		setSolidScreen(BLACK);
+		wait_for_vsync();
+		pixel_buffer_start = *(pixel_ctrl_ptr + 1);
+		setSolidScreen(BLACK);
+		wait_for_vsync();
+		pixel_buffer_start = *(pixel_ctrl_ptr + 1);
+		setSolidScreen(BLACK);
+		wait_for_vsync();
+		pixel_buffer_start = *(pixel_ctrl_ptr + 1);
 		
-		drawScore(borderEndY + 5, player1.prevScore, BLACK, digits);
-		drawScore(yMin + 5 + platformSize, player2.prevScore, BLACK, digits);
-		
-		// Update past variables
+		player1.x = player1StartX;
+		player1.y = player1StartY;
+		player2.x = player2StartX;
+		player2.y = player2StartY;
 		player1.pastX = player1.x;
 		player1.pastY = player1.y;
-		
 		player2.pastX = player2.x;
 		player2.pastY = player2.y;
 		
-		player1.prevScore = player1.score;
-		player2.prevScore = player2.score;
+		player1.speed = playerSpeed;
+		player1.jumpSpeed = playerJumpSpeed;
+		player1.yVelocity = 0;
+		
+		player2.speed = playerSpeed;
+		player2.jumpSpeed = playerJumpSpeed;
+		player2.yVelocity = 0;
+		
+		bool wPressed = false;
+		aPressed = false;
+		sPressed = false;
+		dPressed = false;
+		upPressed = false;
+		downPressed = false;
+		leftPressed = false;
+		rightPressed = false;
+		
+		for (int i = 3; i < 5; i++) {
+			platforms1[i].startX = borderPlatformSetup[i-3].startX;
+			platforms1[i].prevStartX = borderPlatformSetup[i-3].startX;
+			platforms1[i].startY = borderPlatformSetup[i-3].startY;
+			platforms1[i].prevStartY = borderPlatformSetup[i-3].startY;
+			platforms1[i].colour = borderPlatformSetup[i-3].colour;
+			platforms1[i].height = borderPlatformSetup[i-3].height;
+			platforms1[i].prevHeight = borderPlatformSetup[i-3].height;
+			platforms1[i].width = borderPlatformSetup[i-3].width;
+			platforms1[i].prevWidth = borderPlatformSetup[i-3].width;
+			platformLocations1[i].startX = borderPlatformSetup[i-3].startX;
+			platformLocations1[i].prevStartX = borderPlatformSetup[i-3].startX;
+			platformLocations1[i].startY = borderPlatformSetup[i-3].startY;
+			platformLocations1[i].prevStartY = borderPlatformSetup[i-3].startY;
+			platformLocations1[i].colour = borderPlatformSetup[i-3].colour;
+			platformLocations1[i].height = borderPlatformSetup[i-3].height;
+			platformLocations1[i].prevHeight = borderPlatformSetup[i-3].height;
+			platformLocations1[i].width = borderPlatformSetup[i-3].width;
+			platformLocations1[i].prevWidth = borderPlatformSetup[i-3].width;
+			platforms2[i].startX = borderPlatformSetup[i-3].startX;
+			platforms2[i].prevStartX = borderPlatformSetup[i-3].startX;
+			platforms2[i].startY = borderPlatformSetup[i-3].startY-topBottomYDifference;
+			platforms2[i].prevStartY = borderPlatformSetup[i-3].startY-topBottomYDifference;
+			platforms2[i].colour = borderPlatformSetup[i-3].colour;
+			platforms2[i].height = borderPlatformSetup[i-3].height;
+			platforms2[i].prevHeight = borderPlatformSetup[i-3].height;
+			platforms2[i].width = borderPlatformSetup[i-3].width;
+			platforms2[i].prevWidth = borderPlatformSetup[i-3].width;
+			platformLocations2[i].startX = borderPlatformSetup[i-3].startX;
+			platformLocations2[i].prevStartX = borderPlatformSetup[i-3].startX;
+			platformLocations2[i].startY = borderPlatformSetup[i-3].startY-topBottomYDifference;
+			platformLocations2[i].prevStartY = borderPlatformSetup[i-3].startY-topBottomYDifference;
+			platformLocations2[i].colour = borderPlatformSetup[i-3].colour;
+			platformLocations2[i].height = borderPlatformSetup[i-3].height;
+			platformLocations2[i].prevHeight = borderPlatformSetup[i-3].height;
+			platformLocations2[i].width = borderPlatformSetup[i-3].width;
+			platformLocations2[i].prevWidth = borderPlatformSetup[i-3].width;
+		}
+		
+		for (int i = 5; i < numberOfPlatforms; i++) {
+			platforms1[i].startX = platformSetup[i-5].startX;
+			platforms1[i].prevStartX = platformSetup[i-5].startX;
+			platforms1[i].startY = platformSetup[i-5].startY;
+			platforms1[i].prevStartY = platformSetup[i-5].startY;
+			platforms1[i].colour = platformSetup[i-5].colour;
+			platforms1[i].height = platformSetup[i-5].height;
+			platforms1[i].prevHeight = platformSetup[i-5].height;
+			platforms1[i].width = platformSetup[i-5].width;
+			platforms1[i].prevWidth = platformSetup[i-5].width;
+			platformLocations1[i].startX = platformSetup[i-5].startX;
+			platformLocations1[i].prevStartX = platformSetup[i-5].startX;
+			platformLocations1[i].startY = platformSetup[i-5].startY;
+			platformLocations1[i].prevStartY = platformSetup[i-5].startY;
+			platformLocations1[i].colour = platformSetup[i-5].colour;
+			platformLocations1[i].height = platformSetup[i-5].height;
+			platformLocations1[i].prevHeight = platformSetup[i-5].height;
+			platformLocations1[i].width = platformSetup[i-5].width;
+			platformLocations1[i].prevWidth = platformSetup[i-5].width;
+			platforms2[i].startX = platformSetup[i-5].startX;
+			platforms2[i].prevStartX = platformSetup[i-5].startX;
+			platforms2[i].startY = platformSetup[i-5].startY-topBottomYDifference;
+			platforms2[i].prevStartY = platformSetup[i-5].startY-topBottomYDifference;
+			platforms2[i].colour = platformSetup[i-5].colour;
+			platforms2[i].height = platformSetup[i-5].height;
+			platforms2[i].prevHeight = platformSetup[i-5].height;
+			platforms2[i].width = platformSetup[i-5].width;
+			platforms2[i].prevWidth = platformSetup[i-5].width;
+			platformLocations2[i].startX = platformSetup[i-5].startX;
+			platformLocations2[i].prevStartX = platformSetup[i-5].startX;
+			platformLocations2[i].startY = platformSetup[i-5].startY-topBottomYDifference;
+			platformLocations2[i].prevStartY = platformSetup[i-5].startY-topBottomYDifference;
+			platformLocations2[i].colour = platformSetup[i-5].colour;
+			platformLocations2[i].height = platformSetup[i-5].height;
+			platformLocations2[i].prevHeight = platformSetup[i-5].height;
+			platformLocations2[i].width = platformSetup[i-5].width;
+			platformLocations2[i].prevWidth = platformSetup[i-5].width;
+		}
+		// Main loop
+		while (1) {
+			// Get key presses
+			updateKeys();
 
-        for (int i = 3; i < numberOfPlatforms; i++) {
-            platforms1[i].prevStartX = platforms1[i].startX;
-            platforms1[i].prevStartY = platforms1[i].startY;
-            platforms1[i].prevWidth = platforms1[i].width;
-            platforms1[i].prevHeight = platforms1[i].height;
-			platforms2[i].prevStartX = platforms2[i].startX;
-            platforms2[i].prevStartY = platforms2[i].startY;
-            platforms2[i].prevWidth = platforms2[i].width;
-            platforms2[i].prevHeight = platforms2[i].height;
-        }
-		
-		// Move players
-		movePlayer(&player1, gravity, platforms1, numberOfPlatforms, platformLocations1);
-		movePlayer(&player2, gravity, platforms2, numberOfPlatforms, platformLocations2);
-		
-		if (player1.score != player1.prevScore) {
-			player1Won = true;	
+			// Erase previous players		
+			drawRectangle(player1.pastX, player1.pastY, playerSize, playerSize, BLACK);
+			drawRectangle(player2.pastX, player2.pastY, playerSize, playerSize, BLACK);
+			erasePlatforms(platforms1, numberOfPlatforms);
+			erasePlatforms(platforms2, numberOfPlatforms);
+
+			drawScore(borderEndY + 5, player1.prevScore, BLACK, digits);
+			drawScore(yMin + 5 + platformSize, player2.prevScore, BLACK, digits);
+
+			// Update past variables
+			player1.pastX = player1.x;
+			player1.pastY = player1.y;
+
+			player2.pastX = player2.x;
+			player2.pastY = player2.y;
+
+			player1.prevScore = player1.score;
+			player2.prevScore = player2.score;
+
+			for (int i = 3; i < numberOfPlatforms; i++) {
+				platforms1[i].prevStartX = platforms1[i].startX;
+				platforms1[i].prevStartY = platforms1[i].startY;
+				platforms1[i].prevWidth = platforms1[i].width;
+				platforms1[i].prevHeight = platforms1[i].height;
+				platforms2[i].prevStartX = platforms2[i].startX;
+				platforms2[i].prevStartY = platforms2[i].startY;
+				platforms2[i].prevWidth = platforms2[i].width;
+				platforms2[i].prevHeight = platforms2[i].height;
+			}
+
+			// Move players
+			movePlayer(&player1, gravity, platforms1, numberOfPlatforms, platformLocations1);
+			movePlayer(&player2, gravity, platforms2, numberOfPlatforms, platformLocations2);
+
+			if (player1.score != player1.prevScore) {
+				player1Won = true;
+			}
+
+			drawScore(borderEndY + 5, player1.prevScore, BLACK, digits);
+			drawScore(yMin + 5 + platformSize, player2.prevScore, BLACK, digits);
+
+			player1.prevScore = player1.score;
+			player2.prevScore = player2.score;
+
+			// Draw stuff
+			drawPlatforms(platforms1, numberOfPlatforms);
+			drawPlatforms(platforms2, numberOfPlatforms);
+			drawRectangle(player1.x, player1.y, playerSize, playerSize, player1.colour);
+			drawRectangle(player2.x, player2.y, playerSize, playerSize, player2.colour);
+
+			drawScore(borderEndY + 5, player1.score, WHITE, digits);
+			drawScore(yMin + 5 + platformSize, player2.score, WHITE, digits);
+
+			if (gameOver) {
+				break;	
+			}
+
+			// Switch buffers
+			wait_for_vsync();
+			pixel_buffer_start = *(pixel_ctrl_ptr + 1);
 		}
-		
-		drawScore(borderEndY + 5, player1.prevScore, BLACK, digits);
-		drawScore(yMin + 5 + platformSize, player2.prevScore, BLACK, digits);
-		
-		player1.prevScore = player1.score;
-		player2.prevScore = player2.score;
-		
-		// Draw stuff
-		drawPlatforms(platforms1, numberOfPlatforms);
-		drawPlatforms(platforms2, numberOfPlatforms);
-		drawRectangle(player1.x, player1.y, playerSize, playerSize, player1.colour);
-		drawRectangle(player2.x, player2.y, playerSize, playerSize, player2.colour);
-				
-		drawScore(borderEndY + 5, player1.score, WHITE, digits);
-		drawScore(yMin + 5 + platformSize, player2.score, WHITE, digits);
-				
-		if (gameOver) {
-			break;	
+		drawString(xSize/2-90, ySize/2-14, WHITE, 4, "GAME OVER", letters);
+		int yTop = ySize/4 - 7;
+		int yBottom = ySize*3/4 - 7;
+		if (player1Won) {
+			drawString(xSize/2-30, yBottom, WHITE, 2, "WINNER", letters);
+			drawString(xSize/2-25, yTop, WHITE, 2, "LOSER", letters);
+		} else {
+			drawString(xSize/2-30, yTop, WHITE, 2, "WINNER", letters);
+			drawString(xSize/2-25, yBottom, WHITE, 2, "LOSER", letters);	
 		}
-		
-		// Switch buffers
 		wait_for_vsync();
-        pixel_buffer_start = *(pixel_ctrl_ptr + 1);
+		int data;
+		while (1) {
+			volatile int* PS2_ptr = (int*) 0xFF200100;
+			data = *PS2_ptr;
+			if (buttonPressed()) {
+				gameOver = false;
+				break;
+			}
+		}
 	}
-	drawString(xSize/2-90, ySize/2-14, WHITE, 4, "GAME OVER", letters);
-	int yTop = ySize/4 - 7;
-	int yBottom = ySize*3/4 - 7;
-	if (player1Won) {
-		drawString(xSize/2-30, yBottom, WHITE, 2, "WINNER", letters);
-		drawString(xSize/2-25, yTop, WHITE, 2, "LOSER", letters);
-	} else {
-		drawString(xSize/2-30, yTop, WHITE, 2, "WINNER", letters);
-		drawString(xSize/2-25, yBottom, WHITE, 2, "LOSER", letters);	
-	}
-	wait_for_vsync();
 	return 0;
 }
 
@@ -440,7 +554,7 @@ void checkKey(bool* keyBool, unsigned char code, bool extendedChar) {
 }
 
 void updateKeys() {
-	volatile int * PS2_ptr = (int *) 0xFF200100;
+	volatile int* PS2_ptr = (int *) 0xFF200100;
 	int data;
 	data = *PS2_ptr;
 	if (data & 0x8000) {
@@ -682,6 +796,19 @@ void drawString(int startX, int startY, short int colour, int size, char* text, 
         x += (6*size);
     }
 }
+
+bool buttonPressed() {
+	if (buttons->edge & 0x1) {
+		buttons->edge = 0xf;
+		return true;
+	}
+}
+
+
+
+
+
+
 
 
 
