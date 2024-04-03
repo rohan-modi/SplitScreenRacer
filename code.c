@@ -4,6 +4,10 @@
 #include <string.h>
 #include <ctype.h>
     	
+#include <image_arrays.h>
+	
+#define IMAGE_SIZE 256 // 16x16 Image
+
 volatile int pixel_buffer_start; // global variable
 short int Buffer1[240][512]; // 240 rows, 512 (320 + padding) columns
 short int Buffer2[240][512];
@@ -38,6 +42,8 @@ const short int BLACK = 0x0000;
 const short int RED = 0xF800;
 const short int BLUE = 0x001F;
 const short int GREEN = 0x07E0;
+
+int pos1_16_bit_array[IMAGE_SIZE];
 
 struct platform {
 	int startX;
@@ -124,6 +130,7 @@ const int letterX[]={0x01,0x00,0x00,0x00,0x01,0x01,0x00,0x00,0x00,0x01,0x00,0x01
 const int letterY[]={0x01,0x00,0x00,0x00,0x01,0x01,0x00,0x00,0x00,0x01,0x00,0x01,0x00,0x01,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x01,0x00,0x00};
 const int letterZ[]={0x01,0x01,0x01,0x01,0x01,0x00,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x01,0x01,0x01,0x01,0x01};
 
+void convertTo16bits();
 void plot_pixel(int x, int y, short int line_color);
 void wait_for_vsync();
 void swap(int* num1, int* num2);
@@ -508,6 +515,25 @@ int main(void) {
 		}
 	}
 	return 0;
+}
+
+void convertTo16bits(){
+
+	for(int i = 0; i < IMAGE_SIZE; i++){
+		int pixel8bit = pos1_8_bit_array[i];
+
+		// Extract 8-bit RGB
+		int r = (pixel8bit >> 5) & 0x07; // Extract top 3 bits for red
+		int g = (pixel8bit >> 2) & 0x07; // Extract next 3 bits for green
+		int b = pixel8bit & 0x03; // Extract last 2 bits for blue
+
+		// Put that in 16-bit format
+		int r16 = (r * 255 / 7) >> 3; // 3-bit red to 5-bit
+		int g16 = (g * 255 / 7) >> 2; // 3-bit-green to 6-bit
+		int b16 = (b * 255 / 7) >> 3; // 2-bit blue to 5-bit
+
+		pos1_16_bit_array[i] = (r16 << 11) | (g16 << 5) | b16;
+	}
 }
 
 void plot_pixel(int x, int y, short int line_color) {
