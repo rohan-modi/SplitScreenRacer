@@ -142,7 +142,7 @@ void drawPlatforms(struct platform platforms[], int numberOfPlatforms);
 void erasePlatforms(struct platform platforms[], int numberOfPlatforms);
 void movePlayer(struct Player* player, int gravity, struct platform platforms[], int numberOfPlatforms, struct platform platformLocations[]);
 void drawScore(int y, int score, short int colour, int digits[10][15]);
-void drawImage(int array[], int startX, int startY, int width, int height, short int colour);
+void drawImage(int array[], int startX, int startY, int width, int height);
 void drawLetter(int text[], int startX, int startY, short int colour, int size);
 void drawString(int startX, int startY, short int colour, int size, char* text, int letters[26][35]);
 void drawDigit(const int number[], int startX, int startY, short int colour, int size);
@@ -783,14 +783,16 @@ void drawLetter(int text[], int startX, int startY, short int colour, int size) 
 	}
 }
 
-void drawImage(int array[], int startX, int startY, int width, int height, short int colour) {
+void drawImage(int array[], int startX, int startY, int width, int height) {
 	int index = 0;
+	int colour;
 	for (int y = startY; y < startY+height; y++) {
 		for (int x = startX; x < startX+width; x++) {
-			if (array[index]) {
+
+			colour = array[index++];
+			if (colour != 0) {
 				plot_pixel(x, y, colour);
 			}
-			index++;
 		}
 	}	
 }
