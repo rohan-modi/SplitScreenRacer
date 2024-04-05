@@ -745,6 +745,8 @@ int main(void) {
 			drawImage16Bit(player2.imageData[player2.currentFrame], player2.x, player2.y, playerSize, playerSize);
 			// drawRectangle(player2.x, player2.y, playerSize, playerSize, player2.colour);
 
+			drawScore(borderEndY + 5, player1.score, WHITE, digits);
+			drawScore(yMin + 5 + platformSize, player2.score, WHITE, digits);
 
 			if (gameOver) {
 				break;	
