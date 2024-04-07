@@ -368,6 +368,10 @@ void write_audio_sample(volatile int* audio_ptr, int sample);
 int read_fifo_space(volatile int* audio_ptr);
 void getVolume();
 void drawSpikeBlock(int numberOfSpikes, int startX, int startY);
+void spikePlatform(struct platform* thePlatform, int spikeNumber);
+void unspikePlatform(struct platform* thePlatform);
+bool checkIfPlayerSpiked(struct Player* player, struct platform* thePlatform, int spikeNumber, int sensitivity);
+void resetPlayer(struct Player* player, struct platform platforms[], int numberOfPlatforms, struct platform platformLocations[], int playerStartX, int playerStartY, int playerSpeed, int playerJumpSpeed, struct platformTemplate borderPlatformSetup[], struct platformTemplate platformSetup[], bool top, int topBottomYDifference);
 
 int main(void) {
 	// Setup
@@ -524,22 +528,24 @@ int main(void) {
 	int player2StartX = xSize/2;
 	int player2StartY = platformSize + 1;
 	
-	int playerSpeed = 3;
+	int playerSpeed = 4;
 	int playerJumpSpeed = -10;
+	
+	bool player1Died = false;
+	bool player2Died = false;
 	
 	// Player setup
 	const int* animation_player1_8_bit[] = {pos1_8_bit_array, pos2_8_bit_array, pos3_8_bit_array, pos4_8_bit_array, jump1_8bit_array};
 	int animation_player1_16_bit [frames][16][16];
 	convert_to_2d(animation_player1_16_bit, animation_player1_8_bit, frames, 16, 16);
 
-    struct Player player1 = {xSize/2, ySize/2+15, xSize/2, ySize/2+15, 3, -10, 0, &wPressed, &sPressed, &aPressed, &dPressed, RED, 0, 0, 0, frames, animation_player1_16_bit};
+    struct Player player1 = {xSize/2, ySize/2+15, xSize/2, ySize/2+15, 3, -10, 0, &wPressed, &sPressed, &aPressed, &dPressed, RED, 0, 0, 0, frames, animation_player1_16_bit, player1StartX};
 
     const int* animation_player2_8_bit[] = {pos1_8_bit_array2, pos2_8_bit_array2, pos3_8_bit_array2, pos4_8_bit_array2, jump1_8_bit_array2};
     int animation_player1_16_bit2[frames][16][16];
     convert_to_2d(animation_player1_16_bit2, animation_player2_8_bit, frames, 16, 16);
 
-    struct Player player2 = {xSize/2, 6, xSize/2, 6, 3, -10, 0, &upPressed, &downPressed, &leftPressed, &rightPressed, WHITE, 0, 0, 0, frames, animation_player1_16_bit2};
-
+    struct Player player2 = {xSize/2, 6, xSize/2, 6, 3, -10, 0, &upPressed, &downPressed, &leftPressed, &rightPressed, WHITE, 0, 0, 0, frames, animation_player1_16_bit2, player2StartX};
 
 	volatile int* audio_ptr = AUDIO_BASE;
 	int soundIndex = 0;
@@ -547,6 +553,9 @@ int main(void) {
 	while (1) {
 		gameOver = false;
 		player1Won = false;
+		
+		player1Died = false;
+		player2Died = false;
 		
 		setSolidScreen(BLACK);
 		wait_for_vsync();
@@ -575,7 +584,10 @@ int main(void) {
 		player2.jumpSpeed = playerJumpSpeed;
 		player2.yVelocity = 0;
 		
-		bool wPressed = false;
+		player1.trackX = player1StartX;
+		player2.trackX = player2StartX;
+		
+		wPressed = false;
 		aPressed = false;
 		sPressed = false;
 		dPressed = false;
@@ -583,6 +595,9 @@ int main(void) {
 		downPressed = false;
 		leftPressed = false;
 		rightPressed = false;
+		
+		int player1Delay = 0;
+		int player2Delay = 0;
 		
 		for (int i = 3; i < 5; i++) {
 			platforms1[i].startX = borderPlatformSetup[i-3].startX;
@@ -674,6 +689,9 @@ int main(void) {
 
 			drawScore(borderEndY + 5, player1.prevScore, BLACK, digits);
 			drawScore(yMin + 5 + platformSize, player2.prevScore, BLACK, digits);
+			
+			unspikePlatform(&platforms1[12]);
+			unspikePlatform(&platforms2[12]);
 
 			// Update past variables
 			player1.pastX = player1.x;
@@ -697,9 +715,19 @@ int main(void) {
 			}
 
 			// Move players
-			movePlayer(&player1, gravity, platforms1, numberOfPlatforms, platformLocations1);
-			movePlayer(&player2, gravity, platforms2, numberOfPlatforms, platformLocations2);
+			if (player1Delay == 0) {
+				movePlayer(&player1, gravity, platforms1, numberOfPlatforms, platformLocations1);	
+			} else {
+				player1Delay--;	
+			}
 			
+			if (player2Delay == 0) {
+				movePlayer(&player2, gravity, platforms2, numberOfPlatforms, platformLocations2);	
+			} else {
+				player2Delay--;	
+			}
+			
+						
 			getVolume();
 			float volumeMultiplier = volume/10.0;
 			if (playingJumpSound) {
@@ -731,10 +759,20 @@ int main(void) {
 			drawPlatforms(platforms1, numberOfPlatforms);
 			drawPlatforms(platforms2, numberOfPlatforms);
 			
-			drawImage(arrow, 25, platformSize+10, 14, 9);
-			drawString(25, platformSize+25, CYAN, 1, "GO THAT WAY", letters);
-			drawImage(arrow, 25, borderEndY+10, 14, 9);
-			drawString(25, borderEndY+25, CYAN, 1, "GO THAT WAY", letters);
+			if (player2.trackX < xSize) {
+				drawImage(arrow, 25, platformSize+10, 14, 9);
+				drawString(25, platformSize+25, CYAN, 1, "GO THAT WAY", letters);
+			} else {
+				drawRectangle(25, platformSize+10, 14, 9, BLACK);
+				drawString(25, platformSize+25, BLACK, 1, "GO THAT WAY", letters);
+			}
+			if (player1.trackX < xSize) {
+				drawImage(arrow, 25, borderEndY+10, 14, 9);
+				drawString(25, borderEndY+25, CYAN, 1, "GO THAT WAY", letters);
+			} else {
+				drawRectangle(25, borderEndY+10, 14, 9, BLACK);
+				drawString(25, borderEndY+25, BLACK, 1, "GO THAT WAY", letters);
+			}
 
 			// Players
 			// Update current frame if player is jumping
@@ -747,6 +785,25 @@ int main(void) {
 
 			drawScore(borderEndY + 5, player1.score, WHITE, digits);
 			drawScore(yMin + 5 + platformSize, player2.score, WHITE, digits);
+			
+			if (player1.trackX > 700 && player1.trackX < 814) {
+				spikePlatform(&platforms1[12], 3);
+				player1Died = checkIfPlayerSpiked(&player1, &platforms1[12], 3, 5);
+				if (player1Died) {
+					resetPlayer(&player1, platforms1, numberOfPlatforms, platformLocations1, player1StartX, player1StartY, playerSpeed, playerJumpSpeed, borderPlatformSetup, platformSetup, false, topBottomYDifference);
+					player1Delay = 1;
+					player1Died = false;
+				}
+			}
+			if (player2.trackX > 700 && player2.trackX < 814) {
+				spikePlatform(&platforms2[12], 3);
+				player2Died = checkIfPlayerSpiked(&player2, &platforms2[12], 3, 5);
+				if (player2Died) {
+					resetPlayer(&player2, platforms2, numberOfPlatforms, platformLocations2, player2StartX, player2StartY, playerSpeed, playerJumpSpeed, borderPlatformSetup, platformSetup, true, topBottomYDifference);
+					player2Delay = 1;
+					player2Died = false;
+				}
+			}
 
 			if (gameOver) {
 				break;	
@@ -955,9 +1012,14 @@ void movePlayer(struct Player* player, int gravity, struct platform platforms[],
 			}
 		}
 		if (hitLeftWall == false) {
+			if (adjustment) {
+				player->trackX -= extraDistance;
+			} else {
+				player->trackX -= player->speed;
+			}
 			for (int i = 3; i < numberOfPlatforms; i++) {
 				if (adjustment) {
-					platformLocations[i].startX += extraDistance;	
+					platformLocations[i].startX += extraDistance;
 				} else {
 					platformLocations[i].startX += player->speed;
 				}
@@ -1004,6 +1066,11 @@ void movePlayer(struct Player* player, int gravity, struct platform platforms[],
 			}
 		}
 		if (hitRightWall == false) {
+			if (adjustment) {
+				player->trackX += extraDistance;
+			} else {
+				player->trackX += player->speed;
+			}
 			for (int i = 3; i < numberOfPlatforms; i++) {
 				if (adjustment) {
 					platformLocations[i].startX -= extraDistance;
@@ -1187,13 +1254,104 @@ void drawSpikeBlock(int numberOfSpikes, int startX, int startY){
 	}
 }
 
+void spikePlatform(struct platform* thePlatform, int spikeNumber) {
+	int midPlatform = thePlatform->startX + thePlatform->width/2;
+	int halfSpikeWidth = (spikeNumber*4 + 3);
+	int spikeStartX = midPlatform - halfSpikeWidth;
+	int spikeStartY = thePlatform->startY - 9;
+	drawSpikeBlock(spikeNumber, spikeStartX, spikeStartY);
+}
 
+void unspikePlatform(struct platform* thePlatform) {
+	drawRectangle(thePlatform->startX, thePlatform->startY-9, thePlatform->width, 8, BLACK);
+}
 
+bool checkIfPlayerSpiked(struct Player* player, struct platform* thePlatform, int spikeNumber, int sensitivity) {
+	int midPlatform = thePlatform->startX + thePlatform->width/2;
+	int halfSpikeWidth = (spikeNumber*4 + 3);
+	int spikeStartX = midPlatform - halfSpikeWidth;
+	int spikeEndX = midPlatform + halfSpikeWidth;
+	int spikeStartY = thePlatform->startY - 9;
+	int playerCentre = player->x + 8;
+	if ((playerCentre + sensitivity > spikeStartX && playerCentre + sensitivity < spikeEndX) || (playerCentre - sensitivity > spikeStartX && playerCentre - sensitivity < spikeEndX)) {
+		if (player->y+16 >= spikeStartY && player->y+16 <= thePlatform->startY) {
+			return true;	
+		}
+	}
+	return false;
+}
 
+void resetPlayer(struct Player* player, struct platform platforms[], int numberOfPlatforms, struct platform platformLocations[], int playerStartX, int playerStartY, int playerSpeed, int playerJumpSpeed, struct platformTemplate borderPlatformSetup[], struct platformTemplate platformSetup[], bool top, int topBottomYDifference) {
+	player->x = playerStartX;
+	player->y = playerStartY;
+	player->pastX = player->x;
+	player->pastY = player->y;
+	player->speed = playerSpeed;
+	player->jumpSpeed = playerJumpSpeed;
+	player->yVelocity = 0;
+	player->trackX = playerStartX;
+		
+	for (int i = 3; i < 5; i++) {
+		platforms[i].startX = borderPlatformSetup[i-3].startX;
+		platforms[i].startY = borderPlatformSetup[i-3].startY;
+		platforms[i].colour = borderPlatformSetup[i-3].colour;
+		platforms[i].height = borderPlatformSetup[i-3].height;
+		platforms[i].width = borderPlatformSetup[i-3].width;
+		platformLocations[i].startX = borderPlatformSetup[i-3].startX;
+		platformLocations[i].startY = borderPlatformSetup[i-3].startY;
+		platformLocations[i].colour = borderPlatformSetup[i-3].colour;
+		platformLocations[i].height = borderPlatformSetup[i-3].height;
+		platformLocations[i].width = borderPlatformSetup[i-3].width;
+		if (top) {
+			platformLocations[i].startY -= topBottomYDifference;
+			platforms[i].startY -= topBottomYDifference;
+		}
+	}
+		
+	for (int i = 5; i < numberOfPlatforms; i++) {
+		platforms[i].startX = platformSetup[i-5].startX;
+		platforms[i].startY = platformSetup[i-5].startY;
+		platforms[i].colour = platformSetup[i-5].colour;
+		platforms[i].height = platformSetup[i-5].height;
+		platforms[i].width = platformSetup[i-5].width;
+		platformLocations[i].startX = platformSetup[i-5].startX;
+		platformLocations[i].startY = platformSetup[i-5].startY;
+		platformLocations[i].colour = platformSetup[i-5].colour;
+		platformLocations[i].height = platformSetup[i-5].height;
+		platformLocations[i].width = platformSetup[i-5].width;
+		if (top) {
+			platformLocations[i].startY -= topBottomYDifference;
+			platforms[i].startY -= topBottomYDifference;
+		}
+	}
+	
+	
 
+	if (top) {
+		drawRectangle(0, 0, xSize, ySize/2, BLACK);		
+	} else {
+		drawRectangle(0, ySize/2, xSize, ySize/2, BLACK);
+	}
 
+	if (top) {
+		drawRectangle(0, 0, xSize, ySize/2, BLACK);		
+	} else {
+		drawRectangle(0, ySize/2, xSize, ySize/2, BLACK);
+	}
+	volatile int* pixel_ctrl_ptr = (int*) 0xFF203020;
+	wait_for_vsync();
+	pixel_buffer_start = *(pixel_ctrl_ptr + 1);
+	if (top) {
+		drawRectangle(0, 0, xSize, ySize/2, BLACK);		
+	} else {
+		drawRectangle(0, ySize/2, xSize, ySize/2, BLACK);
+	}
 
-
-
-
-
+	if (top) {
+		drawRectangle(0, 0, xSize, ySize/2, BLACK);		
+	} else {
+		drawRectangle(0, ySize/2, xSize, ySize/2, BLACK);
+	}
+	wait_for_vsync();
+	pixel_buffer_start = *(pixel_ctrl_ptr + 1);
+}
