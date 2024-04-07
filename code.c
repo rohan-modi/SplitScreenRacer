@@ -372,6 +372,8 @@ void spikePlatform(struct platform* thePlatform, int spikeNumber);
 void unspikePlatform(struct platform* thePlatform);
 bool checkIfPlayerSpiked(struct Player* player, struct platform* thePlatform, int spikeNumber, int sensitivity);
 void resetPlayer(struct Player* player, struct platform platforms[], int numberOfPlatforms, struct platform platformLocations[], int playerStartX, int playerStartY, int playerSpeed, int playerJumpSpeed, struct platformTemplate borderPlatformSetup[], struct platformTemplate platformSetup[], bool top, int topBottomYDifference);
+bool secondElapsed(int timerAddress);
+void set1SecondTimer(int timerAddress);
 
 int main(void) {
 	// Setup
@@ -599,6 +601,9 @@ int main(void) {
 		int player1Delay = 0;
 		int player2Delay = 0;
 		
+		bool player1CountDownBegun = false;
+		bool player2CountDownBegun = false;
+		
 		for (int i = 3; i < 5; i++) {
 			platforms1[i].startX = borderPlatformSetup[i-3].startX;
 			platforms1[i].prevStartX = borderPlatformSetup[i-3].startX;
@@ -715,16 +720,12 @@ int main(void) {
 			}
 
 			// Move players
-			if (player1Delay == 0) {
+			if (player1Died == false) {
 				movePlayer(&player1, gravity, platforms1, numberOfPlatforms, platformLocations1);	
-			} else {
-				player1Delay--;	
 			}
 			
-			if (player2Delay == 0) {
+			if (player2Died == false) {
 				movePlayer(&player2, gravity, platforms2, numberOfPlatforms, platformLocations2);	
-			} else {
-				player2Delay--;	
 			}
 			
 						
@@ -756,8 +757,12 @@ int main(void) {
 			player2.prevScore = player2.score;
 
 			// Draw stuff
-			drawPlatforms(platforms1, numberOfPlatforms);
-			drawPlatforms(platforms2, numberOfPlatforms);
+			if (player1Died == false) {
+				drawPlatforms(platforms1, numberOfPlatforms);
+			}
+            if (player2Died == false) {
+			    drawPlatforms(platforms2, numberOfPlatforms);
+            }
 			
 			if (player2.trackX < xSize) {
 				drawImage(arrow, 25, platformSize+10, 14, 9);
@@ -779,29 +784,119 @@ int main(void) {
             updateCurrentFrame(&player1);
 			updateCurrentFrame(&player2);
 
-			drawImage16Bit(player1.imageData[player1.currentFrame], player1.x, player1.y, playerSize, playerSize);
-			drawImage16Bit(player2.imageData[player2.currentFrame], player2.x, player2.y, playerSize, playerSize);
+			if (player1Died == false) {
+				drawImage16Bit(player1.imageData[player1.currentFrame], player1.x, player1.y, playerSize, playerSize);
+			}
+            if (player2Died == false) {
+                drawImage16Bit(player2.imageData[player2.currentFrame], player2.x, player2.y, playerSize, playerSize);
+            }
 			// drawRectangle(player2.x, player2.y, playerSize, playerSize, player2.colour);
 
 			drawScore(borderEndY + 5, player1.score, WHITE, digits);
 			drawScore(yMin + 5 + platformSize, player2.score, WHITE, digits);
 			
 			if (player1.trackX > 700 && player1.trackX < 814) {
-				spikePlatform(&platforms1[12], 3);
+				if (player1Died == false) {
+					spikePlatform(&platforms1[12], 3);
+				}
 				player1Died = checkIfPlayerSpiked(&player1, &platforms1[12], 3, 5);
 				if (player1Died) {
-					resetPlayer(&player1, platforms1, numberOfPlatforms, platformLocations1, player1StartX, player1StartY, playerSpeed, playerJumpSpeed, borderPlatformSetup, platformSetup, false, topBottomYDifference);
-					player1Delay = 1;
-					player1Died = false;
+					if (player1CountDownBegun == false) {
+						player1Delay = 3;
+						player1CountDownBegun = true;
+						drawRectangle(0, ySize/2, xSize, ySize/2, BLACK);
+						drawString(xSize/2-100, borderEndY+10, CYAN, 1, "YOU DIED AND SHALL RESPAWN IN", letters);
+						drawDigit(three, xSize/2, borderEndY+70, CYAN, 3);
+						wait_for_vsync();
+						pixel_buffer_start = *(pixel_ctrl_ptr + 1);
+						drawRectangle(0, ySize/2, xSize, ySize/2, BLACK);
+						drawString(xSize/2-100, borderEndY+10, CYAN, 1, "YOU DIED AND SHALL RESPAWN IN", letters);
+						drawDigit(three, xSize/2, borderEndY+70, CYAN, 3);
+						wait_for_vsync();
+						pixel_buffer_start = *(pixel_ctrl_ptr + 1);
+						set1SecondTimer(0xff202000);
+					} else {
+						if (secondElapsed(0xff202000)) {
+							if (player1Delay == 1) {
+								resetPlayer(&player1, platforms1, numberOfPlatforms, platformLocations1, player1StartX, player1StartY, playerSpeed, playerJumpSpeed, borderPlatformSetup, platformSetup, false, topBottomYDifference);	
+								player1Died = false;
+								player1CountDownBegun = false;
+							} else {
+								player1Delay--;
+								if (player1Delay == 2) {
+									drawDigit(three, xSize/2, borderEndY+70, BLACK, 3);	
+									drawDigit(two, xSize/2, borderEndY+70, CYAN, 3);
+								} else if (player1Delay == 1) {
+									drawDigit(two, xSize/2, borderEndY+70, BLACK, 3);	
+									drawDigit(one, xSize/2, borderEndY+70, CYAN, 3);	
+								}
+								wait_for_vsync();
+								pixel_buffer_start = *(pixel_ctrl_ptr + 1);
+								if (player1Delay == 2) {
+									drawDigit(three, xSize/2, borderEndY+70, BLACK, 3);	
+									drawDigit(two, xSize/2, borderEndY+70, CYAN, 3);
+								} else if (player1Delay == 1) {
+									drawDigit(two, xSize/2, borderEndY+70, BLACK, 3);	
+									drawDigit(one, xSize/2, borderEndY+70, CYAN, 3);
+								}
+								wait_for_vsync();
+								pixel_buffer_start = *(pixel_ctrl_ptr + 1);
+								set1SecondTimer(0xff202000);
+							}
+						}
+					}					
 				}
 			}
 			if (player2.trackX > 700 && player2.trackX < 814) {
-				spikePlatform(&platforms2[12], 3);
+				if (player2Died == false) {
+					spikePlatform(&platforms2[12], 3);
+				}
 				player2Died = checkIfPlayerSpiked(&player2, &platforms2[12], 3, 5);
 				if (player2Died) {
-					resetPlayer(&player2, platforms2, numberOfPlatforms, platformLocations2, player2StartX, player2StartY, playerSpeed, playerJumpSpeed, borderPlatformSetup, platformSetup, true, topBottomYDifference);
-					player2Delay = 1;
-					player2Died = false;
+					if (player2CountDownBegun == false) {
+						player2Delay = 3;
+						player2CountDownBegun = true;
+                		drawRectangle(0, 0, xSize, ySize/2, BLACK);		
+						drawString(xSize/2-100, playerSize+10, CYAN, 1, "YOU DIED AND SHALL RESPAWN IN", letters);
+						drawDigit(three, xSize/2, playerSize+70, CYAN, 3);
+						wait_for_vsync();
+						pixel_buffer_start = *(pixel_ctrl_ptr + 1);
+                		drawRectangle(0, 0, xSize, ySize/2, BLACK);		
+						drawString(xSize/2-100, playerSize+10, CYAN, 1, "YOU DIED AND SHALL RESPAWN IN", letters);
+						drawDigit(three, xSize/2, playerSize+70, CYAN, 3);
+						wait_for_vsync();
+						pixel_buffer_start = *(pixel_ctrl_ptr + 1);
+						set1SecondTimer(0xff202020);
+					} else {
+						if (secondElapsed(0xff202020)) {
+							if (player2Delay == 1) {
+								resetPlayer(&player2, platforms2, numberOfPlatforms, platformLocations2, player2StartX, player2StartY, playerSpeed, playerJumpSpeed, borderPlatformSetup, platformSetup, true, topBottomYDifference);	
+								player2Died = false;
+								player2CountDownBegun = false;
+							} else {
+								player2Delay--;
+								if (player2Delay == 2) {
+									drawDigit(three, xSize/2, playerSize+70, BLACK, 3);	
+									drawDigit(two, xSize/2, playerSize+70, CYAN, 3);
+								} else if (player2Delay == 1) {
+									drawDigit(two, xSize/2, playerSize+70, BLACK, 3);	
+									drawDigit(one, xSize/2, playerSize+70, CYAN, 3);	
+								}
+								wait_for_vsync();
+								pixel_buffer_start = *(pixel_ctrl_ptr + 1);
+								if (player2Delay == 2) {
+									drawDigit(three, xSize/2, playerSize+70, BLACK, 3);	
+									drawDigit(two, xSize/2, playerSize+70, CYAN, 3);
+								} else if (player2Delay == 1) {
+									drawDigit(two, xSize/2, playerSize+70, BLACK, 3);	
+									drawDigit(one, xSize/2, playerSize+70, CYAN, 3);
+								}
+								wait_for_vsync();
+								pixel_buffer_start = *(pixel_ctrl_ptr + 1);
+								set1SecondTimer(0xff202020);
+							}
+						}
+					}					
 				}
 			}
 
@@ -1324,8 +1419,6 @@ void resetPlayer(struct Player* player, struct platform platforms[], int numberO
 			platforms[i].startY -= topBottomYDifference;
 		}
 	}
-	
-	
 
 	if (top) {
 		drawRectangle(0, 0, xSize, ySize/2, BLACK);		
@@ -1355,3 +1448,33 @@ void resetPlayer(struct Player* player, struct platform platforms[], int numberO
 	wait_for_vsync();
 	pixel_buffer_start = *(pixel_ctrl_ptr + 1);
 }
+
+bool secondElapsed(int timerAddress) {
+	volatile int* timerPointer = (int*) timerAddress;
+	int timeOut = (*timerPointer) & 0x1;
+	if (timeOut) {
+		*(timerPointer + 1) = 0b1000;
+		return true;
+	}
+	return false;
+}
+
+void set1SecondTimer(int timerAddress) {
+	volatile int* timerPointer = (int*) timerAddress;
+	*(timerPointer + 2) = 0b1110000100000000;
+	*(timerPointer + 3) = 0b0000010111110101;
+	*(timerPointer + 1) = 0b0100;
+	*(timerPointer) = 0b10;
+}
+
+
+
+
+
+
+
+
+
+
+
+
