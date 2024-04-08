@@ -1222,18 +1222,20 @@ void swap(int* num1, int* num2) {
 }
 
 void checkKey(bool* keyBool, unsigned char code, bool extendedChar) {
-	if (key1 == code && key2 != 0xF0) {
-		(*keyBool) = true;	
-	}
-	if (key1 == code && key2 == 0xF0) {
-		(*keyBool) = false;	
-	}
+    if (extendedChar == false) {
+        if (key1 == code && key2 != 0xF0) {
+            (*keyBool) = true;	
+        }
+        if (key1 == code && key2 == 0xF0) {
+            (*keyBool) = false;	
+        }
+    }
 	if (extendedChar) {
-		if (key1 == 0x72 && key2 == 0xE0 && key3 != 0xF0) {
-			(*keyBool) = true;	
+		if (key1 == code && key2 == 0xE0) {
+			(*keyBool) = true;
 		}
-		if (key1 == 0x72 && key2 == 0xE0 && key3 != 0xF0) {
-			(*keyBool) = true;	
+		if (key1 == code && key2 == 0xF0 && key3 == 0xE0) {
+			(*keyBool) = false;	
 		}
 	}
 }
@@ -1249,10 +1251,8 @@ void updateKeys() {
 	}
 	checkKey(&wPressed, 0x1D, false);
 	checkKey(&aPressed, 0x1C, false);
-	checkKey(&sPressed, 0x1B, false);
 	checkKey(&dPressed, 0x23, false);
 	checkKey(&upPressed, 0x75, true);
-	checkKey(&downPressed, 0x72, true);
 	checkKey(&leftPressed, 0x6B, true);
 	checkKey(&rightPressed, 0x74, true);
     checkKey(&enterPressed, 0x5A, true);
