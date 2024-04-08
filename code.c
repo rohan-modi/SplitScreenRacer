@@ -395,6 +395,67 @@ const int jump1_8_bit_array2_mirror[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
 };
 
+// POWER UP ARRAYS
+
+// Initial state
+const int pos1_coin[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xa3, 0xf6, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xb2, 0xff, 0xa3, 0xf6, 0xa3, 0xf6, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xb2, 0xff, 0xa3, 0xf6, 0xa3, 0xf6, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xb2, 0xff, 0xa3, 0xf6, 0xa3, 0xf6, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xb2, 0xff, 0xa3, 0xf6, 0xa3, 0xf6, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xa3, 0xf6, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+};
+// Semi-Turned
+const int pos2_coin[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xa3, 0xf6, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xa3, 0xf6, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xa3, 0xf6, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xa3, 0xf6, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xa3, 0xf6, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xa3, 0xf6, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
+// Turned
+const int pos3_coin[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xb2, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xb2, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xb2, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xb2, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xb2, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xb2, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+};
+
+// Bright one
+const int pos4_coin[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xa3, 0xf6, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xa3, 0xf6, 0xa3, 0xf6, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xb2, 0xff, 0xa3, 0xf6, 0xa3, 0xf6, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xa3, 0xf6, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+};
+
+// Bright two
+const int pos5_coin[] = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xa3, 0xf6, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xb2, 0xff, 0xa3, 0xf6, 0xa3, 0xf6, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xb2, 0xff, 0xa3, 0xf6, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xb2, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0xb2, 0xff, 0xb2, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
 	
 #define IMAGE_SIZE 256 // 16x16 Image
 
@@ -431,6 +492,10 @@ int platformSize = 5;
 float volume = 10.0;
 
 int frames = 5;
+int framesPowerUp = 10;
+
+int initialCoinX = 300;
+int initialCoinY = 205;
 
 const short int WHITE = 0xFFFF;
 const short int BLACK = 0x0000;
@@ -485,7 +550,23 @@ struct Player {
 	int trackX;
 	int (*imageDataMirror)[16][16];
 	int facingRight;
+	bool isImmune;
+	int immunityCounter;
 };
+
+// ROHAN
+struct PowerUp {
+    int x;
+    int y;
+    int prevX; 
+    int prevY; 
+    int spikesCount;
+    int currentFrame;
+    int frameCount;
+	bool isActive;
+    int (*imageData)[8][8];
+};
+
 
 struct PIT_t {
 	volatile unsigned int data;
@@ -537,6 +618,7 @@ const int letterY[]={0x01,0x00,0x00,0x00,0x01,0x01,0x00,0x00,0x00,0x01,0x00,0x01
 const int letterZ[]={0x01,0x01,0x01,0x01,0x01,0x00,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x01,0x01,0x01,0x01,0x01};
 
 void convert_to_2d(int matrix[][16][16], const int* arr[], int frames, int row, int col);
+void convert_to_2d_powerUp(int matrix [][8][8], const int* arr[], int frames, int row, int col);
 void plot_pixel(int x, int y, short int line_color);
 void wait_for_vsync();
 void swap(int* num1, int* num2);
@@ -567,6 +649,11 @@ bool checkIfPlayerSpiked(struct Player* player, struct platform* thePlatform, in
 void resetPlayer(struct Player* player, struct platform platforms[], int numberOfPlatforms, struct platform platformLocations[], int playerStartX, int playerStartY, int playerSpeed, int playerJumpSpeed, struct platformTemplate borderPlatformSetup[], struct platformTemplate platformSetup[], bool top, int topBottomYDifference);
 bool secondElapsed(int timerAddress);
 void set1SecondTimer(int timerAddress);
+void updatePowerUpFrame(struct PowerUp *powerUp, int frameDelay);
+void drawImage16Bit_8x8(int array[][8], int startX, int startY, int width, int height);
+void drawPowerUp(struct PowerUp *powerUp);
+void movePowerUpWithPlayer(struct PowerUp* powerUp, struct Player* player, int playerSpeed);
+bool checkCollisionPlayerCoin(int playerX, int playerY, int playerWidth, int playerHeight, int coinX, int coinY, int coinWidth, int coinHeight);
 
 int main(void) {
 	// Setup
@@ -739,7 +826,7 @@ int main(void) {
 	convert_to_2d(animation_player1_16_bit_mirror, animation_player1_8_bit_mirror, frames, 16, 16);
 
 
-    struct Player player1 = {xSize/2, ySize/2+15, xSize/2, ySize/2+15, 3, -10, 0, &wPressed, &sPressed, &aPressed, &dPressed, RED, 0, 0, 0, frames, animation_player1_16_bit, player1StartX, animation_player1_16_bit_mirror, 1};
+    struct Player player1 = {xSize/2, ySize/2+15, xSize/2, ySize/2+15, 3, -10, 0, &wPressed, &sPressed, &aPressed, &dPressed, RED, 0, 0, 0, frames, animation_player1_16_bit, player1StartX, animation_player1_16_bit_mirror, 1, false, 0};
 
     const int* animation_player2_8_bit[] = {pos1_8_bit_array2, pos2_8_bit_array2, pos3_8_bit_array2, pos4_8_bit_array2, jump1_8_bit_array2};
     int animation_player1_16_bit2[frames][16][16];
@@ -749,7 +836,14 @@ int main(void) {
 	int animation_player2_16_bit_mirror[frames][16][16];
 	convert_to_2d(animation_player2_16_bit_mirror, animation_player2_8_bit_mirror, frames, 16, 16);
 
-    struct Player player2 = {xSize/2, 6, xSize/2, 6, 3, -10, 0, &upPressed, &downPressed, &leftPressed, &rightPressed, WHITE, 0, 0, 0, frames, animation_player1_16_bit2, player2StartX, animation_player2_16_bit_mirror, 1};
+    struct Player player2 = {xSize/2, 6, xSize/2, 6, 3, -10, 0, &upPressed, &downPressed, &leftPressed, &rightPressed, WHITE, 0, 0, 0, frames, animation_player1_16_bit2, player2StartX, animation_player2_16_bit_mirror, 1, false, 0};
+
+	// Power Up setup
+	const int* animation_powerUp_8bit[] = {pos1_coin, pos1_coin, pos2_coin, pos3_coin, pos2_coin, pos1_coin, pos1_coin, pos1_coin, pos4_coin, pos5_coin};
+	int animation_powerUp_16_bit[framesPowerUp][8][8];
+	convert_to_2d_powerUp(animation_powerUp_16_bit, animation_powerUp_8bit, framesPowerUp, 8, 8);
+	struct PowerUp avoidSpikes1 = {initialCoinX, initialCoinY, initialCoinX, initialCoinY, 0, 0, framesPowerUp, true, animation_powerUp_16_bit}; // ROHAN
+	struct PowerUp avoidSpikes2 = {initialCoinX, initialCoinY - ySize/2, initialCoinX, initialCoinY - ySize/2, 0, 0, framesPowerUp, true, animation_powerUp_16_bit};
     
 	volatile int* audio_ptr = AUDIO_BASE;
 	int soundIndex = 0;
@@ -883,6 +977,22 @@ int main(void) {
 			platformLocations2[i].width = platformSetup[i-5].width;
 			platformLocations2[i].prevWidth = platformSetup[i-5].width;
 		}
+
+		// Reset power ups
+		avoidSpikes1.x = initialCoinX;
+		avoidSpikes1.y = initialCoinY;
+		avoidSpikes1.prevX = avoidSpikes1.x;
+		avoidSpikes1.prevY = avoidSpikes1.y;
+		avoidSpikes1.isActive = true;
+		player1.isImmune = false;
+
+		avoidSpikes2.x = initialCoinX;
+		avoidSpikes2.y = initialCoinY - ySize/2;
+		avoidSpikes2.prevX = avoidSpikes2.x;
+		avoidSpikes2.prevY = avoidSpikes2.y;
+		avoidSpikes2.isActive = true;
+		player2.isImmune = false;
+
 		// Main loop
 		while (1) {
 			// Get key presses
@@ -893,7 +1003,8 @@ int main(void) {
 			drawRectangle(player2.pastX, player2.pastY, playerSize, playerSize, BLACK);
 			erasePlatforms(platforms1, numberOfPlatforms);
 			erasePlatforms(platforms2, numberOfPlatforms);
-
+			drawRectangle(avoidSpikes1.prevX, avoidSpikes1.prevY, 8, 8, BLACK); // ROHAN
+			drawRectangle(avoidSpikes2.prevX, avoidSpikes2.prevY, 8, 8, BLACK);
 			drawScore(borderEndY + 5, player1.prevScore, BLACK, digits);
 			drawScore(yMin + 5 + platformSize, player2.prevScore, BLACK, digits);
 			
@@ -910,6 +1021,12 @@ int main(void) {
 			player1.prevScore = player1.score;
 			player2.prevScore = player2.score;
 
+            avoidSpikes1.prevX = avoidSpikes1.x;
+            avoidSpikes1.prevY = avoidSpikes1.y;
+
+			avoidSpikes2.prevX = avoidSpikes2.x;
+			avoidSpikes2.prevY = avoidSpikes2.y;
+
 			for (int i = 3; i < numberOfPlatforms; i++) {
 				platforms1[i].prevStartX = platforms1[i].startX;
 				platforms1[i].prevStartY = platforms1[i].startY;
@@ -923,7 +1040,8 @@ int main(void) {
 
 			// Move players
 			if (player1Died == false) {
-				movePlayer(&player1, gravity, platforms1, numberOfPlatforms, platformLocations1);	
+				movePlayer(&player1, gravity, platforms1, numberOfPlatforms, platformLocations1);
+				movePowerUpWithPlayer(&avoidSpikes1, &player1, playerSpeed);	// ROHAN
 			}
 			
 			if (player2Died == false) {
@@ -939,6 +1057,21 @@ int main(void) {
 
 			player1.prevScore = player1.score;
 			player2.prevScore = player2.score;
+
+			// CHECK COLLISION BETWEEN PLAYER AND POWER UP
+			bool player1GotCoin = checkCollisionPlayerCoin(player1.x, player1.y, playerSize, playerSize, avoidSpikes1.x, avoidSpikes1.y, 8, 8);
+			if(player1GotCoin && avoidSpikes1.isActive){
+				avoidSpikes1.isActive = false;
+				player1.isImmune = true;
+				player1.immunityCounter = 1; // 1 is the immunity duration
+			}
+
+			bool player2GotCoin = checkCollisionPlayerCoin(player2.x, player2.y, playerSize, playerSize, avoidSpikes2.x, avoidSpikes2.y, 8, 8);
+			if(player2GotCoin && avoidSpikes2.isActive){
+				avoidSpikes2.isActive = false;
+				player2.isImmune = true;
+				// player2.immunityCounter = 2; // 1 is the immunity duration
+			}
 
 			// Draw stuff
             getVolume();
@@ -979,6 +1112,18 @@ int main(void) {
 				drawPlayer(&player2);
             }
 
+			// Power Up
+			updatePowerUpFrame(&avoidSpikes1, 3); // Adjust the integer to whatever feels good
+			if(avoidSpikes1.isActive){
+				drawPowerUp(&avoidSpikes1);
+			}
+
+			updatePowerUpFrame(&avoidSpikes2, 3);
+			if(avoidSpikes2.isActive){
+				drawPowerUp(&avoidSpikes2);
+			}
+
+			// Score
 			drawScore(borderEndY + 5, player1.score, WHITE, digits);
 			drawScore(yMin + 5 + platformSize, player2.score, WHITE, digits);
 			
@@ -1087,6 +1232,13 @@ int main(void) {
 				}
 			}
 
+			// if(player1.immunityCounter > 0){
+			// 	player1.immunityCounter--;
+			// 	if(player1.immunityCounter == 0){
+			// 		player1.isImmune = false; // immunity ends
+			// 	}
+			// }
+
 			if (gameOver) {
 				break;	
 			}
@@ -1132,6 +1284,19 @@ void convert_to_2d(int matrix[][16][16], const int* arr[], int frames, int row, 
     }
 }
 
+
+void convert_to_2d_powerUp(int matrix [][8][8], const int* arr[], int frames, int row, int col){
+	for(int f = 0; f < frames; f++){
+		int k = 0;
+		for(int i = 0; i < row; i++){
+			for(int j = 0; j < col; j++){
+				int merged_value = (int)arr[f][k + 1] << 8 | arr[f][k];
+				matrix[f][i][j] = merged_value;
+				k += 2;
+			}
+		}
+	}
+}
 
 void plot_pixel(int x, int y, short int line_color) {
 	volatile short int *one_pixel_address;
@@ -1574,6 +1739,11 @@ bool checkIfPlayerSpiked(struct Player* player, struct platform* thePlatform, in
 	int spikeEndX = midPlatform + halfSpikeWidth;
 	int spikeStartY = thePlatform->startY - 9;
 	int playerCentre = player->x + 8;
+
+	if(player->isImmune){
+		return false;
+	}
+
 	if ((playerCentre + sensitivity > spikeStartX && playerCentre + sensitivity < spikeEndX) || (playerCentre - sensitivity > spikeStartX && playerCentre - sensitivity < spikeEndX)) {
 		if (player->y+16 >= spikeStartY && player->y+16 <= thePlatform->startY) {
 			return true;	
@@ -1671,4 +1841,69 @@ void set1SecondTimer(int timerAddress) {
 	*(timerPointer + 3) = 0b0000010111110101;
 	*(timerPointer + 1) = 0b0100;
 	*(timerPointer) = 0b10;
+}
+
+// ROHAN
+void updatePowerUpFrame(struct PowerUp *powerUp, int frameDelay) {
+    static int delayCounter = 0;
+
+    // Update the frame if reached frameDelay count
+    if (++delayCounter >= frameDelay) {
+        powerUp->currentFrame = (powerUp->currentFrame + 1) % powerUp->frameCount;
+        delayCounter = 0; // Reset the counter after changing the frame
+    }
+}
+
+
+void drawImage16Bit_8x8(int array[][8], int startX, int startY, int width, int height) {
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            int colour = array[y][x];
+            if(colour != BLACK){
+                plot_pixel(startX + x, startY + y, colour);
+            }
+        }
+    }
+}
+
+
+void drawPowerUp(struct PowerUp *powerUp){
+    drawImage16Bit_8x8(powerUp->imageData[powerUp->currentFrame], powerUp->x, powerUp->y, 8, 8);
+	// powerUp->prevX = powerUp->x; // Update previous position
+    // powerUp->prevY = powerUp->y;
+}
+
+
+void movePowerUpWithPlayer(struct PowerUp* powerUp, struct Player* player, int playerSpeed) {
+    if (*(player->leftControl)) {
+        // If the player moves left, move the power-up right
+        powerUp->x += playerSpeed;
+    }
+    if (*(player->rightControl)) {
+        // If the player moves right, move the power-up left
+        powerUp->x -= playerSpeed;
+    }
+    // // Ensure the power-up stays within the bounds of the screen
+    // if (powerUp->x < 0) {
+    //     powerUp->x = 0;
+    // } else if (powerUp->x > xSize - 8) {
+    //     powerUp->x = xSize - 8;
+    // }
+}
+
+bool checkCollisionPlayerCoin(int playerX, int playerY, int playerWidth, int playerHeight, int coinX, int coinY, int coinWidth, int coinHeight){
+    // Check if player's right edge is left of the coin's left edge
+    if (playerX + playerWidth < coinX) return false;
+
+    // Check if player's left edge is right of the coin's right edge
+    if (playerX > coinX + coinWidth) return false;
+
+    // Check if player's bottom edge is above the coin's top edge
+    if (playerY + playerHeight < coinY) return false;
+
+    // Check if player's top edge is below the coin's bottom edge
+    if (playerY > coinY + coinHeight) return false;
+
+    // If none of the above, there is an overlap
+    return true;
 }
