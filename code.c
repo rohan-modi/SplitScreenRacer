@@ -545,7 +545,7 @@ void checkKey(bool* keyBool, unsigned char code, bool extendedChar);
 void updateKeys();
 void setSolidScreen(short int colour);
 void drawRectangle(int xStart, int yStart, int width, int height, short int colour);
-void drawPlatforms(struct platform platforms[], int numberOfPlatforms);
+void drawPlatforms(struct platform platforms[], int numberOfPlatforms, float volumeMultiplier, bool* playingJumpSound, int* soundIndex);
 void erasePlatforms(struct platform platforms[], int numberOfPlatforms);
 void movePlayer(struct Player* player, int gravity, struct platform platforms[], int numberOfPlatforms, struct platform platformLocations[]);
 void drawScore(int y, int score, short int colour, int digits[10][15]);
@@ -932,16 +932,16 @@ int main(void) {
 				movePlayer(&player2, gravity, platforms2, numberOfPlatforms, platformLocations2);	
 			}
 			
-						
+			/*			
 			getVolume();
 			float volumeMultiplier = volume/10.0;
 			if (playingJumpSound) {
-				if ((*(audio_ptr+1) & 0x00FF0000) > 128) {
+				if ((*(audio_ptr+1) & 0x00FF0000) >= 128) {
 					for (int i = 0; i < 128; i++) {
 						*(audio_ptr + 2) = (int) (mario_sound_data[soundIndex]*(volumeMultiplier));
 					    *(audio_ptr + 3) = (int) (mario_sound_data[soundIndex]*(volumeMultiplier));
                    		soundIndex++;
-                       	if (soundIndex > mario_sound_data_length) {
+                       	if (soundIndex >= mario_sound_data_length) {
                            	soundIndex = 0;
                            	playingJumpSound = false;
                             break;
@@ -949,6 +949,7 @@ int main(void) {
                    	}
 				}	
 			}
+            */
 			
 			if (player1.score != player1.prevScore) {
 				player1Won = true;
@@ -961,12 +962,35 @@ int main(void) {
 			player2.prevScore = player2.score;
 
 			// Draw stuff
+            getVolume();
+			float volumeMultiplier = volume/10.0;
 			if (player1Died == false) {
-				drawPlatforms(platforms1, numberOfPlatforms);
+				drawPlatforms(platforms1, numberOfPlatforms, volumeMultiplier, &playingJumpSound, &soundIndex);
 			}
+            /*
+            getVolume();
+			volumeMultiplier = volume/10.0;
+			if (playingJumpSound) {
+				if ((*(audio_ptr+1) & 0x00FF0000) >= 128) {
+					for (int i = 0; i < 128; i++) {
+						*(audio_ptr + 2) = (int) (mario_sound_data[soundIndex]*(volumeMultiplier));
+					    *(audio_ptr + 3) = (int) (mario_sound_data[soundIndex]*(volumeMultiplier));
+                   		soundIndex++;
+                       	if (soundIndex >= mario_sound_data_length) {
+                           	soundIndex = 0;
+                           	playingJumpSound = false;
+                            break;
+                       	}                        
+                   	}
+				}	
+			}
+            */
+            getVolume();
+			volumeMultiplier = volume/10.0;
             if (player2Died == false) {
-			    drawPlatforms(platforms2, numberOfPlatforms);
+				drawPlatforms(platforms2, numberOfPlatforms, volumeMultiplier, &playingJumpSound, &soundIndex);
             }
+
 			
 			if (player2.trackX < xSize) {
 				drawImage(arrow, 25, platformSize+10, 14, 9);
@@ -1248,8 +1272,26 @@ void drawRectangle(int xStart, int yStart, int width, int height, short int colo
 	}
 }
 
-void drawPlatforms(struct platform platforms[], int numberOfPlatforms) {
+void drawPlatforms(struct platform platforms[], int numberOfPlatforms, float volumeMultiplier, bool* playingJumpSound, int* soundIndex) {
+	volatile int* audio_ptr = 0xFF203040;
+
+	if ((*playingJumpSound)) {
+		if ((*(audio_ptr+1) & 0x00FF0000) >= 128) {
+			for (int j = 0; j < 128; j++) {
+				*(audio_ptr + 2) = (int) (mario_sound_data[(*soundIndex)]*(volumeMultiplier));
+				*(audio_ptr + 3) = (int) (mario_sound_data[(*soundIndex)]*(volumeMultiplier));
+				(*soundIndex)++;
+				if ((*soundIndex) >= mario_sound_data_length) {
+					(*soundIndex) = 0;
+					(*playingJumpSound) = false;
+					break;
+				}                        
+			}
+		}	
+	}
+
 	for (int i = 0; i < numberOfPlatforms; i++) {
+		
 		if (platforms[i].startX >= xMin && platforms[i].startX + platforms[i].width <= xSize) {
 			drawRectangle(platforms[i].startX, platforms[i].startY, platforms[i].width, platforms[i].height, platforms[i].colour);	
 		} else if (platforms[i].startX >= xMin) {
