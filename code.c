@@ -933,25 +933,6 @@ int main(void) {
 				movePlayer(&player2, gravity, platforms2, numberOfPlatforms, platformLocations2);	
 			}
 			
-			/*			
-			getVolume();
-			float volumeMultiplier = volume/10.0;
-			if (playingJumpSound) {
-				if ((*(audio_ptr+1) & 0x00FF0000) >= 128) {
-					for (int i = 0; i < 128; i++) {
-						*(audio_ptr + 2) = (int) (mario_sound_data[soundIndex]*(volumeMultiplier));
-					    *(audio_ptr + 3) = (int) (mario_sound_data[soundIndex]*(volumeMultiplier));
-                   		soundIndex++;
-                       	if (soundIndex >= mario_sound_data_length) {
-                           	soundIndex = 0;
-                           	playingJumpSound = false;
-                            break;
-                       	}                        
-                   	}
-				}	
-			}
-            */
-			
 			if (player1.score != player1.prevScore) {
 				player1Won = true;
 			}
@@ -968,24 +949,7 @@ int main(void) {
 			if (player1Died == false) {
 				drawPlatforms(platforms1, numberOfPlatforms, volumeMultiplier, &playingJumpSound, &soundIndex);
 			}
-            /*
-            getVolume();
-			volumeMultiplier = volume/10.0;
-			if (playingJumpSound) {
-				if ((*(audio_ptr+1) & 0x00FF0000) >= 128) {
-					for (int i = 0; i < 128; i++) {
-						*(audio_ptr + 2) = (int) (mario_sound_data[soundIndex]*(volumeMultiplier));
-					    *(audio_ptr + 3) = (int) (mario_sound_data[soundIndex]*(volumeMultiplier));
-                   		soundIndex++;
-                       	if (soundIndex >= mario_sound_data_length) {
-                           	soundIndex = 0;
-                           	playingJumpSound = false;
-                            break;
-                       	}                        
-                   	}
-				}	
-			}
-            */
+
             getVolume();
 			volumeMultiplier = volume/10.0;
             if (player2Died == false) {
@@ -1013,21 +977,12 @@ int main(void) {
             updateCurrentFrame(&player1);
 			updateCurrentFrame(&player2);
 
-			// Players
-			// Update current frame if player is jumping
-            // updateCurrentFrame(&player1);
-			// updateCurrentFrame(&player2);
-
-
-			// drawPlayer(&player1);
-			// drawPlayer(&player2);
 			if (player1Died == false) {
 				drawPlayer(&player1);
 			}
             if (player2Died == false) {
 				drawPlayer(&player2);
             }
-			// drawRectangle(player2.x, player2.y, playerSize, playerSize, player2.colour);
 
 			drawScore(borderEndY + 5, player1.score, WHITE, digits);
 			drawScore(yMin + 5 + platformSize, player2.score, WHITE, digits);
@@ -1168,18 +1123,6 @@ int main(void) {
 	return 0;
 }
 
-// Function to convert 1D array to 2D array and merge two adjacent 8-bit values into one 16-bit value
-// void convert_to_2d(int matrix[16][16], const int *arr, int row, int col) {
-//     int i, j, k = 0;
-//     for (i = 0; i < row; i++) {
-//         for (j = 0; j < col; j++) {
-//             // Merge two 8-bit values into one 16-bit value with adjusted byte order
-//             int merged_value = (int)arr[k + 1] << 8 | arr[k];
-//             matrix[i][j] = merged_value; // Store merged value in the 2D array
-//             k += 2; // Move to the next pair of values in the 1D array
-//         }
-//     }
-// }
 void convert_to_2d(int matrix[][16][16], const int* arr[], int frames, int row, int col) {
     for (int f = 0; f < frames; f++) {
         int k = 0;
@@ -1595,21 +1538,17 @@ void drawSpikeBlock(int numberOfSpikes, int startX, int startY){
 		for (int x = startX; x < startX+length; x+=2) {
 			if (yIndex == 0) {
 				if (xIndex % 4 == 0) {
-					//plot_pixel(x, y, LIGHT_GRAY);
 					drawRectangle(x, y, 2, 2, LIGHT_GRAY);
 				}			
 			} else if (yIndex == 1) {
 				if (((xIndex+2) % 4 != 0) && (x > startX+4) && xIndex < length) {
-					//plot_pixel(x-1, y, LIGHT_GRAY);	
 					drawRectangle(x-2, y, 2, 2, LIGHT_GRAY);
 				}
 			} else if (yIndex == 2) {
 				if (xIndex > 1 && xIndex < length/2) {
-					//plot_pixel(x, y, LIGHT_GRAY);
 					drawRectangle(x, y, 2, 2, LIGHT_GRAY);
 				}
 			} else {
-				//plot_pixel(x, y, DARK_GRAY);
 				drawRectangle(x, y, 2, 2, DARK_GRAY);
 			}
 			xIndex++;
