@@ -4,8 +4,6 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
-    	
-// #include <image_arrays.h>
 	
 volatile int* AUDIO_BASE = 0xFF203040;
         	
@@ -752,8 +750,7 @@ int main(void) {
 	convert_to_2d(animation_player2_16_bit_mirror, animation_player2_8_bit_mirror, frames, 16, 16);
 
     struct Player player2 = {xSize/2, 6, xSize/2, 6, 3, -10, 0, &upPressed, &downPressed, &leftPressed, &rightPressed, WHITE, 0, 0, 0, frames, animation_player1_16_bit2, player2StartX, animation_player2_16_bit_mirror, 1};
-
-
+    
 	volatile int* audio_ptr = AUDIO_BASE;
 	int soundIndex = 0;
 	
@@ -1562,12 +1559,12 @@ void spikePlatform(struct platform* thePlatform, int spikeNumber) {
 	int midPlatform = thePlatform->startX + thePlatform->width/2;
 	int halfSpikeWidth = (spikeNumber*4 + 3);
 	int spikeStartX = midPlatform - halfSpikeWidth;
-	int spikeStartY = thePlatform->startY - 9;
+	int spikeStartY = thePlatform->startY - 8;
 	drawSpikeBlock(spikeNumber, spikeStartX, spikeStartY);
 }
 
 void unspikePlatform(struct platform* thePlatform) {
-	drawRectangle(thePlatform->startX, thePlatform->startY-9, thePlatform->width, 8, BLACK);
+	drawRectangle(thePlatform->startX, thePlatform->startY-8, thePlatform->width, 8, BLACK);
 }
 
 bool checkIfPlayerSpiked(struct Player* player, struct platform* thePlatform, int spikeNumber, int sensitivity) {
