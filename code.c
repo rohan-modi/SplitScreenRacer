@@ -416,6 +416,7 @@ bool upPressed = false;
 bool downPressed = false;
 bool leftPressed = false;
 bool rightPressed = false;
+bool enterPressed = false;
 
 bool gameOver = false;
 bool playingJumpSound = false;
@@ -1254,6 +1255,7 @@ void updateKeys() {
 	checkKey(&downPressed, 0x72, true);
 	checkKey(&leftPressed, 0x6B, true);
 	checkKey(&rightPressed, 0x74, true);
+    checkKey(&enterPressed, 0x5A, true);
 }
 
 void setSolidScreen(short int colour) {
