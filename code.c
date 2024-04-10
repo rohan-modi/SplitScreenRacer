@@ -16187,47 +16187,58 @@ int main(void) {
   return 0;
 }
 
-void convert_to_2d(int matrix[][16][16], const int* arr[], int frames, int row,
-                   int col) {
+void convert_to_2d(int matrix[][16][16], const int* arr[], int frames, int row, int col) {
+  if (!arr || frames <= 0 || row <= 0 || col <= 0) {
+    // Invalid input
+    return;
+  }
   for (int f = 0; f < frames; f++) {
-    int k = 0;
-    for (int i = 0; i < row; i++) {
-      for (int j = 0; j < col; j++) {
-        // Merge two 8-bit values into one 16-bit value with adjusted byte order
-        int merged_value = (int)arr[f][k + 1] << 8 | arr[f][k];
-        matrix[f][i][j] = merged_value;  // Store merged value in the 2D array
-        k += 2;  // Move to the next pair of values in the 1D array
-      }
+    if (!arr[f]) {
+      // Invalid frame pointer
+      continue;
+    }
+    const int* framePtr = arr[f];
+    for (int i = 0; i < row * col; i++) {
+      int merged_value = framePtr[0] | (framePtr[1] << 8);
+      matrix[f][i / col][i % col] = merged_value;
+      framePtr += 2;
     }
   }
 }
 
-void convert_to_2d_powerUp(int matrix[][8][8], const int* arr[], int frames,
-                           int row, int col) {
+
+void convert_to_2d_powerUp(int matrix[][8][8], const int* arr[], int frames, int row, int col) {
+  if (!arr || frames <= 0 || row <= 0 || col <= 0) {
+    // Invalid input
+    return;
+  }
   for (int f = 0; f < frames; f++) {
-    int k = 0;
-    for (int i = 0; i < row; i++) {
-      for (int j = 0; j < col; j++) {
-        int merged_value = (int)arr[f][k + 1] << 8 | arr[f][k];
-        matrix[f][i][j] = merged_value;
-        k += 2;
-      }
+    if (!arr[f]) {
+      // Invalid frame pointer
+      continue;
+    }
+    const int* framePtr = arr[f];
+    for (int i = 0; i < row * col; i++) {
+      int merged_value = framePtr[0] | (framePtr[1] << 8);
+      matrix[f][i / col][i % col] = merged_value;
+      framePtr += 2;
     }
   }
 }
 
-void convert_to_2d_background(int matrix[240][320], const int* arr, int row,
-                              int col) {
-  int k = 0;
-  for (int i = 0; i < row; i++) {
-    for (int j = 0; j < col; j++) {
-      // Merge two 8-bit values into one 16-bit value with adjusted byte order
-      int merged_value = (int)arr[k + 1] << 8 | arr[k];
-      matrix[i][j] = merged_value;  // Store merged value in the 2D array
-      k += 2;  // Move to the next pair of values in the 1D array
-    }
+void convert_to_2d_background(int matrix[240][320], const int* arr, int row, int col) {
+  if (!arr || row <= 0 || col <= 0) {
+    // Invalid input
+    return;
+  }
+  const int* ptr = arr;
+  for (int i = 0; i < row * col; i++) {
+    int merged_value = (*ptr) | (*(ptr + 1) << 8);
+    matrix[i / col][i % col] = merged_value;
+    ptr += 2;
   }
 }
+
 
 void plot_pixel(int x, int y, short int line_color) {
   volatile short int* one_pixel_address;
@@ -16584,22 +16595,21 @@ void drawString(int startX, int startY, short int colour, int size, char* text,
 }
 
 bool buttonPressed() {
-  if (buttons->edge & 0x1) {
-    buttons->edge = 0xf;
-    return true;
-  }
+	if (buttons->edge & 0x1) {
+		buttons->edge = 0xf;
+		return true;
+	}
 }
 
-void drawImage16Bit(int array[][16], int startX, int startY, int width,
-                    int height) {
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      int colour = array[y][x];
-      if (colour != BLACK) {
-        plot_pixel(startX + x, startY + y, colour);
-      }
-    }
-  }
+void drawImage16Bit(int array[][16], int startX, int startY, int width, int height) {
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+		int colour = array[y][x];
+		if (colour != BLACK) {
+			plot_pixel(startX + x, startY + y, colour);
+		}
+		}
+	}
 }
 
 void updateCurrentFrame(struct Player* player) {
@@ -16636,11 +16646,11 @@ void updateCurrentFrame(struct Player* player) {
 }
 
 void drawPlayer(struct Player* player) {
-  int(*currentFrames)[16][16] =
-      player->facingRight ? player->imageData : player->imageDataMirror;
+	int(*currentFrames)[16][16] =
+		player->facingRight ? player->imageData : player->imageDataMirror;
 
-  drawImage16Bit(currentFrames[player->currentFrame], player->x, player->y,
-                 playerSize, playerSize);
+	drawImage16Bit(currentFrames[player->currentFrame], player->x, player->y,
+					playerSize, playerSize);
 }
 
 void getVolume() {
@@ -16823,78 +16833,75 @@ void resetPlayer(struct Player* player, struct platform platforms[],
 }
 
 bool secondElapsed(int timerAddress) {
-  volatile int* timerPointer = (int*)timerAddress;
-  int timeOut = (*timerPointer) & 0x1;
-  if (timeOut) {
-    *(timerPointer + 1) = 0b1000;
-    return true;
-  }
-  return false;
+	volatile int* timerPointer = (int*)timerAddress;
+	int timeOut = (*timerPointer) & 0x1;
+	if (timeOut) {
+		*(timerPointer + 1) = 0b1000;
+		return true;
+	}
+	return false;
 }
 
 void set1SecondTimer(int timerAddress) {
-  volatile int* timerPointer = (int*)timerAddress;
-  *(timerPointer + 2) = 0b1110000100000000;
-  *(timerPointer + 3) = 0b0000010111110101;
-  *(timerPointer + 1) = 0b0100;
-  *(timerPointer) = 0b10;
+	volatile int* timerPointer = (int*)timerAddress;
+	*(timerPointer + 2) = 0b1110000100000000;
+	*(timerPointer + 3) = 0b0000010111110101;
+	*(timerPointer + 1) = 0b0100;
+	*(timerPointer) = 0b10;
 }
 
 // ROHAN
 void updatePowerUpFrame(struct PowerUp* powerUp, int frameDelay) {
-  static int delayCounter = 0;
+	static int delayCounter = 0;
 
-  // Update the frame if reached frameDelay count
-  if (++delayCounter >= frameDelay) {
-    powerUp->currentFrame = (powerUp->currentFrame + 1) % powerUp->frameCount;
-    delayCounter = 0;  // Reset the counter after changing the frame
-  }
+	// Update the frame if reached frameDelay count
+	if (++delayCounter >= frameDelay) {
+		powerUp->currentFrame = (powerUp->currentFrame + 1) % powerUp->frameCount;
+		delayCounter = 0;  // Reset the counter after changing the frame
+	}
 }
 
-void drawImage16Bit_8x8(int array[][8], int startX, int startY, int width,
-                        int height) {
-  for (int y = 0; y < height; y++) {
-    for (int x = 0; x < width; x++) {
-      int colour = array[y][x];
-      if (colour != BLACK) {
-        plot_pixel(startX + x, startY + y, colour);
-      }
-    }
-  }
+void drawImage16Bit_8x8(int array[][8], int startX, int startY, int width, int height) {
+	for (int y = 0; y < height; y++) {
+		for (int x = 0; x < width; x++) {
+			int colour = array[y][x];
+			if (colour != BLACK) {
+				plot_pixel(startX + x, startY + y, colour);
+			}
+		}
+  	}
 }
 
 void drawBackgroundImage(int array[240][320]) {
-  for (int j = 0; j < 240; j++) {
-    for (int i = 0; i < 320; i++) {
-      int color = array[j][i];
-      plot_pixel(i, j, color);
-    }
-  }
-  // LATER IMPLEMENT PRESS ENTER TO START
-  char text[] = "PRESS ENTER TO START";
-  int textWidth = strlen(text) * 6;
-  int startX = (xSize - textWidth);
-  int startY = 120;
+	for (int j = 0; j < 240; j++) {
+		for (int i = 0; i < 320; i++) {
+			int color = array[j][i];
+			plot_pixel(i, j, color);
+		}
+	}
+	// LATER IMPLEMENT PRESS ENTER TO START
+	char text[] = "PRESS ENTER TO START";
+	int textWidth = strlen(text) * 6;
+	int startX = (xSize - textWidth);
+	int startY = 120;
 
-  int letters[26][35] = {letterA, letterB, letterC, letterD, letterE, letterF,
-                         letterG, letterH, letterI, letterJ, letterK, letterL,
-                         letterM, letterN, letterO, letterP, letterQ, letterR,
-                         letterS, letterT, letterU, letterV, letterW, letterX,
-                         letterY, letterZ};
-  drawString(startX, startY, WHITE, 1, text, letters);
+	int letters[26][35] = {letterA, letterB, letterC, letterD, letterE, letterF,
+							letterG, letterH, letterI, letterJ, letterK, letterL,
+							letterM, letterN, letterO, letterP, letterQ, letterR,
+							letterS, letterT, letterU, letterV, letterW, letterX,
+							letterY, letterZ};
+	drawString(startX, startY, WHITE, 1, text, letters);
 }
 
 void waitForEnterKeyPress() {
-  while (!enterPressed) {
-    updateKeys();
-  }
+	while (!enterPressed) {
+		updateKeys();
+	}
 }
 
 void drawPowerUp(struct PowerUp* powerUp) {
-  drawImage16Bit_8x8(powerUp->imageData[powerUp->currentFrame], powerUp->x,
-                     powerUp->y, 8, 8);
-  // powerUp->prevX = powerUp->x; // Update previous position
-  // powerUp->prevY = powerUp->y;
+	drawImage16Bit_8x8(powerUp->imageData[powerUp->currentFrame], powerUp->x, powerUp->y, 8, 8);
+
 }
 
 void movePowerUpWithPlayer(struct PowerUp* powerUp, struct Player* player,
@@ -16913,19 +16920,17 @@ void movePowerUpWithPlayer(struct PowerUp* powerUp, struct Player* player,
   }
 }
 
-bool checkCollisionPlayerCoin(int playerX, int playerY, int playerWidth,
-                              int playerHeight, int coinX, int coinY,
-                              int coinWidth, int coinHeight) {
-  // Check if player's right edge is left of the coin's left edge
+bool checkCollisionPlayerCoin(int playerX, int playerY, int playerWidth, int playerHeight, int coinX, int coinY, int coinWidth, int coinHeight) {
+  // Player right edge / Coin left edge
   if (playerX + playerWidth < coinX) return false;
 
-  // Check if player's left edge is right of the coin's right edge
+  // Player left edge / Coin right edge
   if (playerX > coinX + coinWidth) return false;
 
-  // Check if player's bottom edge is above the coin's top edge
+// Player bottom edge / Coin top edge
   if (playerY + playerHeight < coinY) return false;
 
-  // Check if player's top edge is below the coin's bottom edge
+  // Player top edge / Coin bottom edge
   if (playerY > coinY + coinHeight) return false;
 
   // If none of the above, there is an overlap
