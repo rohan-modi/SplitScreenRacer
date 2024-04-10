@@ -15081,10 +15081,8 @@ unsigned char key3 = 0;
 
 bool wPressed = false;
 bool aPressed = false;
-bool sPressed = false;
 bool dPressed = false;
 bool upPressed = false;
-bool downPressed = false;
 bool leftPressed = false;
 bool rightPressed = false;
 bool enterPressed = false;
@@ -15149,7 +15147,6 @@ struct Player {
   int jumpSpeed;
   int yVelocity;
   bool* upControl;
-  bool* downControl;
   bool* leftControl;
   bool* rightControl;
   short int colour;
@@ -15377,7 +15374,8 @@ void movePowerUpWithPlayer(struct PowerUp* powerUp, struct Player* player,
 bool checkCollisionPlayerCoin(int playerX, int playerY, int playerWidth,
                               int playerHeight, int coinX, int coinY,
                               int coinWidth, int coinHeight);
-
+void convert_to_2d_background(int matrix[240][320], const int* arr, int row,
+                              int col);
 int main(void) {
   // Setup
   volatile int* pixel_ctrl_ptr = (int*)0xFF203020;
@@ -15523,8 +15521,7 @@ int main(void) {
   struct platform platformB2_13;
   struct platform platformB2_14;
 
-  struct platformTemplate borderPlatform1 = {
-      xMin, borderEndY + 1, platformSize, ySize / 2 - platformSize * 2, BLUE};
+  struct platformTemplate borderPlatform1 = {xMin, borderEndY + 1, platformSize, ySize / 2 - platformSize * 2, BLUE};
   struct platformTemplate borderPlatform2 = {
       mapEndX, borderEndY + 1, platformSize, ySize / 2 - platformSize * 2,
       BLUE};
@@ -15614,7 +15611,6 @@ int main(void) {
                            -10,
                            0,
                            &wPressed,
-                           &sPressed,
                            &aPressed,
                            &dPressed,
                            RED,
@@ -15653,7 +15649,6 @@ int main(void) {
                            -10,
                            0,
                            &upPressed,
-                           &downPressed,
                            &leftPressed,
                            &rightPressed,
                            WHITE,
@@ -15747,10 +15742,8 @@ int main(void) {
 
     wPressed = false;
     aPressed = false;
-    sPressed = false;
     dPressed = false;
     upPressed = false;
-    downPressed = false;
     leftPressed = false;
     rightPressed = false;
 
@@ -15863,7 +15856,6 @@ int main(void) {
     player2.isImmune = false;
 
     // INITIAL SCREEN
-    // drawBackgroundImage(initial_screen_16bits);
     for (int j = 0; j < 240; j++) {
       for (int i = 0; i < 320; i++) {
         int color = initial_screen_16bits[j][i];
@@ -15876,7 +15868,9 @@ int main(void) {
     wait_for_vsync();
     pixel_buffer_start = *(pixel_ctrl_ptr + 1);
 
-    waitForEnterKeyPress();
+    while (!enterPressed) {
+		updateKeys();
+	}
 
     setSolidScreen(BLACK);
     wait_for_vsync();
@@ -16623,7 +16617,7 @@ void updateCurrentFrame(struct Player* player) {
         player->frameCount - 1;  // Assuming the last frame is for jumping
   } else {
     // Check if any movement key is pressed
-    if (*(player->downControl) || *(player->leftControl) ||
+    if (*(player->leftControl) ||
         *(player->rightControl)) {
       player->currentFrame =
           (player->currentFrame + 1) %
@@ -16714,7 +16708,7 @@ bool checkIfPlayerSpiked(struct Player* player, struct platform* thePlatform,
   int halfSpikeWidth = (spikeNumber * 4 + 3);
   int spikeStartX = midPlatform - halfSpikeWidth;
   int spikeEndX = midPlatform + halfSpikeWidth;
-  int spikeStartY = thePlatform->startY - 9;
+  int spikeStartY = thePlatform->startY - 8;
   int playerCentre = player->x + 8;
 
   if (player->isImmune) {
@@ -16916,18 +16910,6 @@ void movePowerUpWithPlayer(struct PowerUp* powerUp, struct Player* player,
       // If the player moves right, move the power-up left
       powerUp->x -= playerSpeed;
     }
-  }
-  // Ensure the power-up stays within the bounds of the screen
-  if (powerUp->x < 0) {
-    powerUp->isActive = 0;
-  } else {
-    powerUp->isActive = 1;
-  }
-
-  if (powerUp->x > xSize - 8) {
-    powerUp->isActive = 0;
-  } else {
-    powerUp->isActive = 1;
   }
 }
 
