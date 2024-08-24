@@ -14,6 +14,8 @@ https://cpulator.01xz.net/?sys=nios-de1soc
 
 <h1>Simulation Instructions</h1>
 
+<h3>NOTE: The clock speed of the FPGA is much higher than the simulator can match, so the game will be much smoother when run on the hardware.</h3>
+
 <p><strong>Initial Simulator Screen:</strong></p>
 <img width="1440" alt="Initial Simulator Screen" src="https://github.com/user-attachments/assets/2073d50a-b04d-4fe0-909c-46e9699f382d">
 <p>This is what the simulator looks like initially upon loading the page.</p>
